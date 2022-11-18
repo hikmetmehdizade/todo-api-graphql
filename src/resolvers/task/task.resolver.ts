@@ -16,7 +16,7 @@ import {
   Workspace,
   AssignedMember,
   WorkspaceTaskStatus,
-} from '../../prisma/generated/types';
+} from '../../../prisma/generated/types';
 import { PrismaService } from 'src/prisma.service';
 
 @Resolver(() => Task)

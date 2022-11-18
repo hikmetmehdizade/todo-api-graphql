@@ -13,6 +13,5 @@ COPY . .
 
 EXPOSE 4001
 
-RUN npm run prisma:generate
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:dev"]

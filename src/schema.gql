@@ -732,6 +732,7 @@ type Mutation {
   createAssignedMember(data: AssignedMemberCreateInput!): AssignedMember!
   updateAssignedMember(data: AssignedMemberUpdateInput!, where: AssignedMemberWhereUniqueInput!): AssignedMember!
   deleteAssignedMember(where: AssignedMemberWhereUniqueInput!): AssignedMember!
+  logIn(email: String!, password: String!): User!
 }
 
 input WorkspaceCreateInput {

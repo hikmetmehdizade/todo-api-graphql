@@ -15,7 +15,7 @@ import {
   DeleteOneWorkspaceMemberArgs,
   User,
   Workspace,
-} from '../../prisma/generated/types';
+} from 'prisma/generated/types';
 import { PrismaService } from 'src/prisma.service';
 
 @Resolver(() => WorkspaceMember)

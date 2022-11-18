@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import {
   Resolver,
   Query,
@@ -6,6 +7,7 @@ import {
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
+import { AuthGuard } from '../auth/auth.guard';
 import { PrismaService } from 'src/prisma.service';
 import {
   Workspace,
@@ -15,13 +17,14 @@ import {
   UpdateOneWorkspaceArgs,
   DeleteOneWorkspaceArgs,
   Task,
-} from '../../prisma/generated/types';
+} from '../../../prisma/generated/types';
 
-@Resolver(() => Workspace)
+@Resolver((of) => Workspace)
+@UseGuards(AuthGuard)
 export class WorkspaceResolver {
   constructor(private prisma: PrismaService) {}
 
-  @Query(() => [Workspace], { name: 'workspaces' })
+  @Query((returns) => [Workspace], { name: 'workspaces' })
   findAll() {
     return this.prisma.workspace.findMany();
   }
