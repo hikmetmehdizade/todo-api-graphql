@@ -307,6 +307,7 @@ type Query {
   workspaceMember(where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
   workspaceMembers(where: WorkspaceMemberWhereInput, orderBy: [WorkspaceMemberOrderByWithRelationInput!], cursor: WorkspaceMemberWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceMemberScalarFieldEnum!]): [WorkspaceMember!]!
   assignedMember(where: AssignedMemberWhereInput, orderBy: [AssignedMemberOrderByWithRelationInput!], cursor: AssignedMemberWhereUniqueInput, take: Int, skip: Int, distinct: [AssignedMemberScalarFieldEnum!]): [AssignedMember!]!
+  me: User!
 }
 
 input WorkspaceWhereUniqueInput {

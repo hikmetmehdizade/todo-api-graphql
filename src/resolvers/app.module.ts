@@ -9,12 +9,19 @@ import { WorkspaceMemberModule } from './workspace-member/workspace-member.modul
 import { AssignedMemberModule } from './assigned-member/assigned-member.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from 'src/interceptors/logging';
+import { GqlAuthGuard } from 'src/guards/auth';
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      playground: true,
+      playground: {
+        settings: {
+          'request.credentials': 'include',
+        },
+      },
       debug: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       context: ({ req, res }) => ({ req, res }),
@@ -26,6 +33,16 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
   ],
-  providers: [PrismaService],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: GqlAuthGuard,
+    },
+    PrismaService,
+  ],
 })
 export class AppModule {}

@@ -1,10 +1,10 @@
 import {
-  Resolver,
-  Mutation,
-  Query,
   Args,
+  Mutation,
   Parent,
+  Query,
   ResolveField,
+  Resolver,
 } from '@nestjs/graphql';
 import {
   AssignedMember,

@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthResolver } from './auth.resolver';
 import { JWT_SECRET_KEY } from 'src/consts';
+import { PrismaService } from 'src/prisma.service';
+import { UserModule } from '../user/user.module';
+import { AuthResolver } from './auth.resolver';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
+    UserModule,
     JwtModule.register({
       secret: JWT_SECRET_KEY,
     }),

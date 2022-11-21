@@ -1,23 +1,23 @@
 import {
-  Query,
-  Resolver,
   Args,
   Mutation,
-  ResolveField,
   Parent,
+  Query,
+  ResolveField,
+  Resolver,
 } from '@nestjs/graphql';
+import { PrismaService } from 'src/prisma.service';
 import {
-  Task,
-  FindUniqueTaskArgs,
-  FindManyTaskArgs,
-  CreateOneTaskArgs,
-  UpdateOneTaskArgs,
-  DeleteOneTaskArgs,
-  Workspace,
   AssignedMember,
+  CreateOneTaskArgs,
+  DeleteOneTaskArgs,
+  FindManyTaskArgs,
+  FindUniqueTaskArgs,
+  Task,
+  UpdateOneTaskArgs,
+  Workspace,
   WorkspaceTaskStatus,
 } from '../../../prisma/generated/types';
-import { PrismaService } from 'src/prisma.service';
 
 @Resolver(() => Task)
 export class TaskResolver {

@@ -5,11 +5,12 @@ import {
   Mutation,
   Resolver,
 } from '@nestjs/graphql';
-import { User } from '../../../prisma/generated/types';
-import { PrismaService } from 'src/prisma.service';
-import { AuthService } from './auth.service';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthCookies } from 'src/consts';
+import { Public } from 'src/decorators';
+import { PrismaService } from 'src/prisma.service';
+import { User } from '../../../prisma/generated/types';
+import { AuthService } from './auth.service';
 
 @Resolver(() => User)
 export class AuthResolver {
@@ -19,36 +20,19 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => User)
+  @Public()
   async logIn(
-    @Context() context: GraphQLExecutionContext,
+    @Context() context: GraphQLExecutionContext & { res: Response },
     @Args('email') email: string,
     @Args('password') password: string,
   ) {
-    const userIdentity = await this.prisma.userIdentity.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await this.authService.validateUser(email, password);
 
-    if (!userIdentity) {
-      throw new NotFoundException(`User with ${email} not found`);
-    }
-
-    if (!this.authService.verifyPassword(password, userIdentity.password)) {
-      throw new BadRequestException('Wrong password');
-    }
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: {
-        email,
-      },
-    });
-
-    const { accessToken, refreshToken } = this.authService.generateTokens(
+    const { accessToken, refreshToken } = await this.authService.generateTokens(
       user.email,
       user.currentWorkspaceId,
     );
 
-    // @ts-ignore
     context.res
       .cookie(AuthCookies.ACCESS_TOKEN, accessToken)
       .cookie(AuthCookies.REFRESH_TOKEN, refreshToken);

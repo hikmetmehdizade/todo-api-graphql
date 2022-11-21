@@ -1,20 +1,20 @@
 import {
-  Resolver,
-  Mutation,
-  Query,
   Args,
+  Mutation,
   Parent,
+  Query,
   ResolveField,
+  Resolver,
 } from '@nestjs/graphql';
 import {
-  FindUniqueWorkspaceMemberArgs,
-  WorkspaceMember,
-  FindManyWorkspaceMemberArgs,
   CreateOneWorkspaceMemberArgs,
-  UpdateOneWorkspaceMemberArgs,
   DeleteOneWorkspaceMemberArgs,
+  FindManyWorkspaceMemberArgs,
+  FindUniqueWorkspaceMemberArgs,
+  UpdateOneWorkspaceMemberArgs,
   User,
   Workspace,
+  WorkspaceMember,
 } from 'prisma/generated/types';
 import { PrismaService } from 'src/prisma.service';
 
