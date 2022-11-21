@@ -733,7 +733,8 @@ type Mutation {
   createAssignedMember(data: AssignedMemberCreateInput!): AssignedMember!
   updateAssignedMember(data: AssignedMemberUpdateInput!, where: AssignedMemberWhereUniqueInput!): AssignedMember!
   deleteAssignedMember(where: AssignedMemberWhereUniqueInput!): AssignedMember!
-  logIn(email: String!, password: String!): User!
+  login(email: String!, password: String!): User!
+  registration(data: RegistrationInput!): User!
 }
 
 input WorkspaceCreateInput {
@@ -1847,4 +1848,11 @@ input AssignedMemberUpdateInput {
   member: WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput
   task: TaskUpdateOneRequiredWithoutAssignedMembersNestedInput
   role: EnumTaskRoleFieldUpdateOperationsInput
+}
+
+input RegistrationInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
 }

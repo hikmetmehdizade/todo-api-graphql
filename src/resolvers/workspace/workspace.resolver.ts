@@ -1,6 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
+  Context,
   Mutation,
   Parent,
   Query,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { GqlAuthGuard } from 'src/guards/auth';
 import { PrismaService } from 'src/prisma.service';
+import { Ctx } from 'src/types';
 import {
   CreateOneWorkspaceArgs,
   DeleteOneWorkspaceArgs,
@@ -24,7 +26,9 @@ export class WorkspaceResolver {
   constructor(private prisma: PrismaService) {}
 
   @Query((returns) => [Workspace], { name: 'workspaces' })
-  findAll() {
+  findAll(@Context() context: Ctx) {
+    console.log('context', context.user);
+
     return this.prisma.workspace.findMany();
   }
 

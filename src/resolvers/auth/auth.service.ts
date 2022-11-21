@@ -38,20 +38,21 @@ export class AuthService {
     return user;
   }
 
-  async generateTokens(email: string, workspaceId?: string) {
+  async generateTokens(email: string, workspaceId: string = undefined) {
     const payload: TokenPayload = { email, workspaceId };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-    await this.prisma.$transaction([
-      this.prisma.userIdentity.update({
-        where: {
-          email,
-        },
-        data: {
-          refreshToken,
-        },
-      }),
+    this.prisma.userIdentity.update({
+      where: {
+        email,
+      },
+      data: {
+        refreshToken,
+      },
+    });
+
+    if (workspaceId) {
       this.prisma.user.update({
         where: {
           email,
@@ -63,13 +64,18 @@ export class AuthService {
             },
           },
         },
-      }),
-    ]);
+      });
+    }
 
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  hashPassword(password: string) {
+    const p = this.jwtService.sign(password);
+    return p;
   }
 
   async verifyPassword(password: string, hashedPassword: string) {

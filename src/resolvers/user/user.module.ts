@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { UserResolver } from './user.resolver';
+import { UserService } from './user.service';
 
 @Module({
   imports: [],

@@ -1,9 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { Request } from 'express';
 import { CookiesToken, DecoratorKeys } from 'src/consts';
 import { AuthService } from 'src/resolvers/auth/auth.service';
+import { Ctx } from 'src/types';
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
@@ -20,7 +20,7 @@ export class GqlAuthGuard implements CanActivate {
     }
 
     const ctx = GqlExecutionContext.create(context);
-    const { cookies } = ctx.getContext<{ req: Request }>().req;
+    const { cookies } = ctx.getContext<Ctx>().req;
     const { auth_access_token, auth_refresh_token } =
       cookies as Partial<CookiesToken>;
 
@@ -29,6 +29,10 @@ export class GqlAuthGuard implements CanActivate {
     const rt = this.authService.verifyToken(auth_refresh_token);
 
     if (typeof at !== 'undefined') {
+      return true;
+    }
+
+    if (typeof rt !== 'undefined') {
       return true;
     }
 
