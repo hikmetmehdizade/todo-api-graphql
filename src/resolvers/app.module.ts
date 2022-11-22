@@ -5,7 +5,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { GqlAuthGuard } from 'src/guards/auth';
 import { LoggingInterceptor } from 'src/interceptors/logging';
-import { JwtStrategy } from 'src/strategies/jwt-strategy';
+import { JwtStrategy } from 'src/strategies/cookie-jwt';
 import { PrismaService } from '../prisma.service';
 import { AssignedMemberModule } from './assigned-member/assigned-member.module';
 import { AuthModule } from './auth/auth.module';

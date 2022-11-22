@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JWT_SECRET_KEY } from 'src/consts';
 import { GqlAuthGuard } from 'src/guards/auth';
 import { PrismaService } from 'src/prisma.service';
-import { JwtStrategy } from 'src/strategies/jwt-strategy';
+import { JwtStrategy } from 'src/strategies/cookie-jwt';
 import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
 import { AuthResolver } from './auth.resolver';
