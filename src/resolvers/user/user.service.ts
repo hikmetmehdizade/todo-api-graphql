@@ -12,8 +12,6 @@ export class UserService {
       },
     });
 
-    console.log('count', count);
-
     return count === 1;
   }
 }

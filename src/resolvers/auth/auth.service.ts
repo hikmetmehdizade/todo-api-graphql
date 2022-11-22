@@ -87,14 +87,58 @@ export class AuthService {
   verifyToken(token?: string): TokenPayload | undefined {
     if (typeof token !== 'undefined') {
       try {
-        const verifiedToken = this.jwtService.verify<TokenPayload>(token, {
-          complete: true,
-        });
+        const verifiedToken = this.jwtService.verify<TokenPayload>(token);
 
         return verifiedToken;
       } catch (err) {
         return;
       }
+    }
+  }
+
+  async verifyCookies(cookies: Partial<CookiesToken>) {
+    const aT = this.verifyToken(cookies?.auth_access_token);
+    const rT = this.verifyToken(cookies?.auth_refresh_token);
+
+    if (typeof aT !== 'undefined') {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: aT.email,
+        },
+      });
+
+      return {
+        user,
+      };
+    }
+
+    if (typeof rT !== 'undefined') {
+      const [userIdentity, user] = await Promise.all([
+        this.prisma.userIdentity.findFirst({
+          where: {
+            email: rT.email,
+            refreshToken: cookies?.auth_refresh_token,
+          },
+        }),
+        this.prisma.user.findUnique({
+          where: {
+            email: rT.email,
+          },
+        }),
+      ]);
+
+      if (!userIdentity) return undefined;
+
+      const { accessToken, refreshToken } = await this.generateTokens(
+        user.email,
+        user.currentWorkspaceId,
+      );
+
+      return {
+        accessToken,
+        refreshToken,
+        user,
+      };
     }
   }
 }

@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class WorkspaceService {
-  constructor(readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async ensureUserIsWorkspaceMember(email: string, workspaceId: string) {
     const count = await this.prisma.workspaceMember.count({
@@ -19,6 +19,38 @@ export class WorkspaceService {
 
     if (count === 0) {
       throw new ForbiddenException('User is not workspace member');
+    }
+  }
+
+  async ensureUserIsWorkspaceOwner(workspaceId: string, userId: string) {
+    const count = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId,
+        user: {
+          uuid: userId,
+        },
+        role: 'OWNER',
+      },
+    });
+
+    if (count === 0) {
+      throw new ForbiddenException('User is not workspace owner');
+    }
+  }
+
+  async ensureUserIsWorkspaceOwnerOrAdmin(workspaceId: string, userId: string) {
+    const count = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId,
+        userId,
+        role: {
+          in: ['ADMIN', 'OWNER'],
+        },
+      },
+    });
+
+    if (count === 0) {
+      throw new ForbiddenException('User is not workspace owner or admin');
     }
   }
 }

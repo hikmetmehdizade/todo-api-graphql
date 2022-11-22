@@ -1,15 +1,17 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { CookiesToken, DecoratorKeys } from 'src/consts';
+import { AuthGuard } from '@nestjs/passport';
+import { DecoratorKeys } from 'src/consts';
 import { AuthService } from 'src/resolvers/auth/auth.service';
-import { Ctx } from 'src/types';
 
 @Injectable()
-export class GqlAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector, private authService: AuthService) {}
+export class GqlAuthGuard extends AuthGuard('cookie-jwt') {
+  constructor(private reflector: Reflector, private authService: AuthService) {
+    super();
+  }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(
       DecoratorKeys.IS_PUBLIC,
       [context.getHandler(), context.getClass()],
@@ -19,23 +21,11 @@ export class GqlAuthGuard implements CanActivate {
       return true;
     }
 
+    return super.canActivate(context);
+  }
+
+  getRequest(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
-    const { cookies } = ctx.getContext<Ctx>().req;
-    const { auth_access_token, auth_refresh_token } =
-      cookies as Partial<CookiesToken>;
-
-    const at = this.authService.verifyToken(auth_access_token);
-
-    const rt = this.authService.verifyToken(auth_refresh_token);
-
-    if (typeof at !== 'undefined') {
-      return true;
-    }
-
-    if (typeof rt !== 'undefined') {
-      return true;
-    }
-
-    return false;
+    return ctx.getContext().req;
   }
 }

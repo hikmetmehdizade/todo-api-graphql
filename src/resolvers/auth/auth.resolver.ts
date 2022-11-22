@@ -1,12 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  GraphQLExecutionContext,
-  Mutation,
-  Resolver,
-} from '@nestjs/graphql';
-import { Response } from 'express';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthCookies } from 'src/consts';
 import { Public } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
@@ -15,8 +8,6 @@ import { User } from '../../../prisma/generated/types';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { RegistrationInput } from './auth.types';
-
-type MyContext = GraphQLExecutionContext & { res: Response };
 
 @Resolver(() => User)
 export class AuthResolver {
@@ -34,7 +25,6 @@ export class AuthResolver {
     @Args('password') password: string,
   ) {
     const user = await this.authService.validateUser(email, password);
-    console.log(context.user);
 
     const { accessToken, refreshToken } = await this.authService.generateTokens(
       user.email,

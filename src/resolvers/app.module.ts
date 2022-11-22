@@ -1,17 +1,19 @@
-import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
-import { WorkspaceModule } from './workspace/workspace.module';
-import { PrismaService } from '../prisma.service';
 import { join } from 'path';
-import { TaskModule } from './task/task.module';
-import { WorkspaceMemberModule } from './workspace-member/workspace-member.module';
+import { GqlAuthGuard } from 'src/guards/auth';
+import { LoggingInterceptor } from 'src/interceptors/logging';
+import { JwtStrategy } from 'src/strategies/jwt-strategy';
+import { PrismaService } from '../prisma.service';
 import { AssignedMemberModule } from './assigned-member/assigned-member.module';
 import { AuthModule } from './auth/auth.module';
+import { TaskModule } from './task/task.module';
 import { UserModule } from './user/user.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggingInterceptor } from 'src/interceptors/logging';
-import { GqlAuthGuard } from 'src/guards/auth';
+import { WorkspaceMemberModule } from './workspace-member/workspace-member.module';
+import { WorkspaceTaskStatusModule } from './workspace-task-status/workspace-task-status.module';
+import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { GqlAuthGuard } from 'src/guards/auth';
     AssignedMemberModule,
     AuthModule,
     UserModule,
+    WorkspaceTaskStatusModule,
   ],
   providers: [
     {
@@ -43,6 +46,7 @@ import { GqlAuthGuard } from 'src/guards/auth';
       useClass: GqlAuthGuard,
     },
     PrismaService,
+    JwtStrategy,
   ],
 })
 export class AppModule {}
