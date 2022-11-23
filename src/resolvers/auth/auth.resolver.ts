@@ -28,7 +28,6 @@ export class AuthResolver {
 
     const { accessToken, refreshToken } = await this.authService.generateTokens(
       user.email,
-      user.currentWorkspaceId,
     );
 
     context.res

@@ -38,8 +38,8 @@ export class AuthService {
     return user;
   }
 
-  async generateTokens(email: string, workspaceId: string = undefined) {
-    const payload: TokenPayload = { email, workspaceId };
+  async generateTokens(email: string) {
+    const payload: TokenPayload = { email };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
@@ -51,21 +51,6 @@ export class AuthService {
         refreshToken,
       },
     });
-
-    if (workspaceId) {
-      this.prisma.user.update({
-        where: {
-          email,
-        },
-        data: {
-          currentWorkspace: {
-            connect: {
-              uuid: workspaceId,
-            },
-          },
-        },
-      });
-    }
 
     return {
       accessToken,
@@ -131,7 +116,6 @@ export class AuthService {
 
       const { accessToken, refreshToken } = await this.generateTokens(
         user.email,
-        user.currentWorkspaceId,
       );
 
       return {

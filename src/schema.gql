@@ -724,6 +724,7 @@ type Mutation {
   createWorkspace(data: WorkspaceCreateInput!): Workspace!
   updateWorkspace(data: WorkspaceUpdateInput!, where: WorkspaceWhereUniqueInput!): Workspace!
   removeWorkspace(where: WorkspaceWhereUniqueInput!): Workspace!
+  changeCurrentWorkspace(workspaceId: String!): Workspace!
   createTask(data: TaskCreateInput!): Task!
   updateTask(data: TaskUpdateInput!, where: TaskWhereUniqueInput!): Task!
   deleteTask(where: TaskWhereUniqueInput!): Task!
