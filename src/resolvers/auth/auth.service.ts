@@ -2,12 +2,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CookiesToken } from 'src/consts';
 import { PrismaService } from 'src/prisma.service';
-import { TokenPayload } from './types';
+import { TokenPayload } from '../../types';
 
 @Injectable()
 export class AuthService {

@@ -7,3 +7,8 @@ export interface Ctx {
   user: User;
   workspaceId?: string;
 }
+
+export class TokenPayload {
+  email: string;
+  workspaceId?: string;
+}

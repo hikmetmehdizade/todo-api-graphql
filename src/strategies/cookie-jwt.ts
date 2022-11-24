@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { CookiesToken, JWT_SECRET_KEY } from 'src/consts';
 import { PrismaService } from 'src/prisma.service';
-import { TokenPayload } from 'src/resolvers/auth/types';
+import { TokenPayload } from 'src/types';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'cookie-jwt') {

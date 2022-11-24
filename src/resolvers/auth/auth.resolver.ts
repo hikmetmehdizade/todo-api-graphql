@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthCookies } from 'src/consts';
-import { Public } from 'src/decorators';
+import { CurrentUser, Public } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
 import { Ctx } from 'src/types';
 import { User } from '../../../prisma/generated/types';
@@ -74,5 +74,23 @@ export class AuthResolver {
       .cookie(AuthCookies.REFRESH_TOKEN, refreshToken);
 
     return user;
+  }
+
+  @Mutation(() => Boolean, { name: 'logout' })
+  async logout(@Context() context: Ctx, @CurrentUser() user: User) {
+    await this.prisma.userIdentity.update({
+      where: {
+        uuid: user.uuid,
+      },
+      data: {
+        refreshToken: null,
+      },
+    });
+
+    context.res
+      .clearCookie(AuthCookies.ACCESS_TOKEN)
+      .clearCookie(AuthCookies.REFRESH_TOKEN);
+
+    return true;
   }
 }

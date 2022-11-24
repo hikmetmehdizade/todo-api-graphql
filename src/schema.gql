@@ -736,6 +736,7 @@ type Mutation {
   deleteAssignedMember(where: AssignedMemberWhereUniqueInput!): AssignedMember!
   login(email: String!, password: String!): User!
   registration(data: RegistrationInput!): User!
+  logout: Boolean!
 }
 
 input WorkspaceCreateInput {
