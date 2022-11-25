@@ -15,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'cookie-jwt') {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: JWT_SECRET_KEY,
-      passReqToCallback: true,
     });
   }
 
@@ -28,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'cookie-jwt') {
     return null;
   }
 
-  async validate(req: Request, payload: TokenPayload) {
+  async validate(payload: TokenPayload) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: payload.email,
