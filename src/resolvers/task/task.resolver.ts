@@ -6,6 +6,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { CurrentUser } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
 import {
   AssignedMember,
@@ -15,13 +16,18 @@ import {
   FindUniqueTaskArgs,
   Task,
   UpdateOneTaskArgs,
+  User,
   Workspace,
   WorkspaceTaskStatus,
 } from '../../../prisma/generated/types';
+import { TaskService } from './task.service';
 
 @Resolver(() => Task)
 export class TaskResolver {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private taskService: TaskService,
+  ) {}
 
   @Query(() => Task, { name: 'task' })
   task(@Args() taskWhereUniqueInput: FindUniqueTaskArgs) {
@@ -33,8 +39,30 @@ export class TaskResolver {
     return this.prisma.task.findMany(findTasksWhereUniqueInput);
   }
   @Mutation(() => Task, { name: 'createTask' })
-  createTask(@Args() createTaskInput: CreateOneTaskArgs) {
-    return this.prisma.task.create(createTaskInput);
+  async createTask(
+    @CurrentUser() user: User,
+    @Args() createTaskInput: CreateOneTaskArgs,
+  ) {
+    const { currentWorkspaceId } = user;
+    const taskStatus = await this.taskService.getFirstTaskStatus(
+      currentWorkspaceId,
+    );
+
+    return this.prisma.task.create({
+      data: {
+        ...createTaskInput.data,
+        workspace: {
+          connect: {
+            uuid: currentWorkspaceId,
+          },
+        },
+        status: {
+          connect: {
+            uuid: taskStatus.uuid,
+          },
+        },
+      },
+    });
   }
 
   @Mutation(() => Task, { name: 'updateTask' })

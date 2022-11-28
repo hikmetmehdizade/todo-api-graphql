@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm install -g prisma typescript ts-node @nestjs/cli
 
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 

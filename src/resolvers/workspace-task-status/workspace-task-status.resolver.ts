@@ -1,6 +1,14 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import {
   CreateOneWorkspaceTaskStatusArgs,
+  Task,
   User,
   WorkspaceTaskStatus,
 } from 'prisma/generated/types';
@@ -21,6 +29,9 @@ export class WorkspaceTaskStatusResolver {
       where: {
         workspaceId: user.currentWorkspaceId,
       },
+      orderBy: {
+        order: 'asc',
+      },
     });
   }
 
@@ -37,5 +48,16 @@ export class WorkspaceTaskStatusResolver {
     return this.prisma.workspaceTaskStatus.create(
       createWorkspaceTaskStatusInput,
     );
+  }
+
+  @ResolveField(() => [Task], { name: 'tasks' })
+  tasks(@Parent() workspaceTaskStatus: WorkspaceTaskStatus) {
+    return this.prisma.workspaceTaskStatus
+      .findUnique({
+        where: {
+          uuid: workspaceTaskStatus.uuid,
+        },
+      })
+      .tasks();
   }
 }
