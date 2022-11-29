@@ -6,15 +6,14 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import {
-  CreateOneWorkspaceTaskStatusArgs,
-  Task,
-  User,
-  WorkspaceTaskStatus,
-} from 'prisma/generated/types';
+import { Task, User, WorkspaceTaskStatus } from '../../@generated';
 import { CurrentUser } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
 import { WorkspaceService } from '../workspace/workspace.service';
+import {
+  WorkspaceTaskStatusesArgs,
+  CreateWorkspaceTaskStatusArgs,
+} from './workspace-task-status.args';
 
 @Resolver(() => WorkspaceTaskStatus)
 export class WorkspaceTaskStatusResolver {
@@ -24,13 +23,18 @@ export class WorkspaceTaskStatusResolver {
   ) {}
 
   @Query(() => [WorkspaceTaskStatus], { name: 'workspaceTaskStatuses' })
-  async findAll(@CurrentUser() user: User) {
+  async findAll(
+    @CurrentUser() user: User,
+    @Args()
+    workspaceTaskStatusesInput: WorkspaceTaskStatusesArgs,
+  ) {
     return this.prisma.workspaceTaskStatus.findMany({
+      ...workspaceTaskStatusesInput,
       where: {
-        workspaceId: user.currentWorkspaceId,
-      },
-      orderBy: {
-        order: 'asc',
+        AND: [
+          workspaceTaskStatusesInput.where,
+          { workspace: { uuid: user.currentWorkspaceId } },
+        ],
       },
     });
   }
@@ -38,16 +42,27 @@ export class WorkspaceTaskStatusResolver {
   @Mutation(() => WorkspaceTaskStatus, { name: 'createWorkspaceTaskStatus' })
   async create(
     @CurrentUser() user: User,
-    @Args() createWorkspaceTaskStatusInput: CreateOneWorkspaceTaskStatusArgs,
+    @Args()
+    createWorkspaceTaskStatusArgs: CreateWorkspaceTaskStatusArgs,
   ) {
     await this.workspaceService.ensureUserIsWorkspaceOwnerOrAdmin(
       user.currentWorkspaceId,
       user.uuid,
     );
 
-    return this.prisma.workspaceTaskStatus.create(
-      createWorkspaceTaskStatusInput,
-    );
+    const { data, workspaceWhereUniqueInput } = createWorkspaceTaskStatusArgs;
+
+    return this.prisma.workspaceTaskStatus.create({
+      data: {
+        ...data,
+        workspace: {
+          connect: {
+            uuid: workspaceWhereUniqueInput?.uuid ?? user.currentWorkspaceId,
+          },
+        },
+      },
+      select: { _count: true },
+    });
   }
 
   @ResolveField(() => [Task], { name: 'tasks' })

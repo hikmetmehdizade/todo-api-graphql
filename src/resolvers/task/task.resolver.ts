@@ -6,20 +6,19 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { CurrentUser } from 'src/decorators';
+import { CurrentUser, WMRoles } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
 import {
   AssignedMember,
-  CreateOneTaskArgs,
-  DeleteOneTaskArgs,
   FindManyTaskArgs,
   FindUniqueTaskArgs,
   Task,
-  UpdateOneTaskArgs,
   User,
   Workspace,
+  WorkspaceMemberRole,
   WorkspaceTaskStatus,
-} from '../../../prisma/generated/types';
+} from '../../@generated';
+import { CreateTaskArgs, DeleteTaskArgs, UpdateTaskArgs } from './task.args';
 import { TaskService } from './task.service';
 
 @Resolver(() => Task)
@@ -38,23 +37,35 @@ export class TaskResolver {
   tasks(@Args() findTasksWhereUniqueInput: FindManyTaskArgs) {
     return this.prisma.task.findMany(findTasksWhereUniqueInput);
   }
+
+  @WMRoles(
+    WorkspaceMemberRole.ADMIN,
+    WorkspaceMemberRole.OWNER,
+    WorkspaceMemberRole.USER,
+  )
   @Mutation(() => Task, { name: 'createTask' })
   async createTask(
     @CurrentUser() user: User,
-    @Args() createTaskInput: CreateOneTaskArgs,
+    @Args() createTaskArgs: CreateTaskArgs,
   ) {
-    const { currentWorkspaceId } = user;
+    const { data, members, workspaceWhereUniqueInput } = createTaskArgs;
     const taskStatus = await this.taskService.getFirstTaskStatus(
-      currentWorkspaceId,
+      workspaceWhereUniqueInput.uuid,
     );
-
+    const assignedMember = members.map(
+      ({ role, workspaceMemberWhereUniqueInput }) => ({
+        role: role,
+        member: { connect: { uuid: workspaceMemberWhereUniqueInput.uuid } },
+      }),
+    );
     return this.prisma.task.create({
       data: {
-        ...createTaskInput.data,
+        ...data,
+        assignedMembers: {
+          create: assignedMember,
+        },
         workspace: {
-          connect: {
-            uuid: currentWorkspaceId,
-          },
+          connect: workspaceWhereUniqueInput,
         },
         status: {
           connect: {
@@ -66,13 +77,15 @@ export class TaskResolver {
   }
 
   @Mutation(() => Task, { name: 'updateTask' })
-  updateTask(@Args() updateTaskInput: UpdateOneTaskArgs) {
-    return this.prisma.task.update(updateTaskInput);
+  updateTask(@Args() updateTaskArgs: UpdateTaskArgs) {
+    const { data, taskWhereUniqueInput } = updateTaskArgs;
+    return this.prisma.task.update({ where: taskWhereUniqueInput, data });
   }
 
   @Mutation(() => Task, { name: 'deleteTask' })
-  deleteTask(@Args() deleteTaskInput: DeleteOneTaskArgs) {
-    return this.prisma.task.delete(deleteTaskInput);
+  deleteTask(@Args() deleteTaskArgs: DeleteTaskArgs) {
+    const { taskWhereUniqueInput } = deleteTaskArgs;
+    return this.prisma.task.delete({ where: taskWhereUniqueInput });
   }
 
   @ResolveField(() => Workspace)

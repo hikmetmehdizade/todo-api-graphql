@@ -1,5 +1,5 @@
 import { Field, InputType, PickType } from '@nestjs/graphql';
-import { UserCreateInput } from 'prisma/generated/types';
+import { UserCreateInput } from '../../@generated';
 
 @InputType()
 export class RegistrationInput extends PickType(UserCreateInput, [

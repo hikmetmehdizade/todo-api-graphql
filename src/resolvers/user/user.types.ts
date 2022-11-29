@@ -1,6 +1,6 @@
 import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { UserWhereUniqueInput } from '../../../prisma/generated/types';
+import { UserWhereUniqueInput } from '../../@generated';
 
 @ArgsType()
 export class InviteUserToWorkspaceInput {

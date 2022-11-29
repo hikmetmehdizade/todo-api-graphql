@@ -2,58 +2,59 @@ import {
   Args,
   Mutation,
   Parent,
-  Query,
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import {
-  AssignedMember,
-  CreateOneAssignedMemberArgs,
-  DeleteOneAssignedMemberArgs,
-  FindManyAssignedMemberArgs,
-  FindUniqueAssignedMemberArgs,
-  Task,
-  UpdateOneAssignedMemberArgs,
-} from 'prisma/generated/types';
+import { AssignedMember, Task } from '../../@generated';
 import { PrismaService } from 'src/prisma.service';
+import {
+  CreateAssignedMemberArgs,
+  UpdateAssignedMemberArgs,
+  DeleteAssignedMemberArgs,
+} from './assigned-member.args';
 
 @Resolver(() => AssignedMember)
 export class AssignedMemberResolver {
   constructor(private prisma: PrismaService) {}
 
-  @Query(() => AssignedMember, { name: 'assignedMember' })
-  assignedMember(
-    @Args() assignedMemberWhereUniqueInput: FindUniqueAssignedMemberArgs,
-  ) {
-    return this.prisma.assignedMember.findUnique(
-      assignedMemberWhereUniqueInput,
-    );
-  }
-
-  @Query(() => [AssignedMember], { name: 'assignedMember' })
-  assignedMembers(@Args() assignedMembersInput: FindManyAssignedMemberArgs) {
-    return this.prisma.assignedMember.findMany(assignedMembersInput);
-  }
-
   @Mutation(() => AssignedMember, { name: 'createAssignedMember' })
   createAssignedMember(
-    @Args() createAssignedMemberInput: CreateOneAssignedMemberArgs,
+    @Args() createAssignedMemberArgs: CreateAssignedMemberArgs,
   ) {
-    return this.prisma.assignedMember.create(createAssignedMemberInput);
+    const { taskWhereUniqueInput, workspaceMemberWhereUniqueInput, role } =
+      createAssignedMemberArgs;
+    return this.prisma.assignedMember.create({
+      data: {
+        role,
+        task: {
+          connect: taskWhereUniqueInput,
+        },
+        member: {
+          connect: workspaceMemberWhereUniqueInput,
+        },
+      },
+    });
   }
 
   @Mutation(() => AssignedMember, { name: 'updateAssignedMember' })
   updateAssignedMember(
-    @Args() updateAssignedMemberInput: UpdateOneAssignedMemberArgs,
+    @Args() updateAssignedMemberArgs: UpdateAssignedMemberArgs,
   ) {
-    return this.prisma.assignedMember.update(updateAssignedMemberInput);
+    const { assignedMemberWhereUniqueInput, role } = updateAssignedMemberArgs;
+    return this.prisma.assignedMember.update({
+      where: assignedMemberWhereUniqueInput,
+      data: { role },
+    });
   }
 
   @Mutation(() => AssignedMember, { name: 'deleteAssignedMember' })
   deleteAssignedMember(
-    @Args() deleteAssignedMemberInput: DeleteOneAssignedMemberArgs,
+    @Args() deleteAssignedMemberArgs: DeleteAssignedMemberArgs,
   ) {
-    return this.prisma.assignedMember.delete(deleteAssignedMemberInput);
+    const { assignedMemberWhereUniqueInput } = deleteAssignedMemberArgs;
+    return this.prisma.assignedMember.delete({
+      where: assignedMemberWhereUniqueInput,
+    });
   }
 
   @ResolveField(() => Task)

@@ -6,18 +6,26 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { WMRoles } from '../../decorators';
 import {
-  CreateOneWorkspaceMemberArgs,
   DeleteOneWorkspaceMemberArgs,
   FindManyWorkspaceMemberArgs,
   FindUniqueWorkspaceMemberArgs,
-  UpdateOneWorkspaceMemberArgs,
   User,
   Workspace,
   WorkspaceMember,
-} from 'prisma/generated/types';
-import { PrismaService } from 'src/prisma.service';
+  WorkspaceMemberRole,
+} from '../../@generated';
+import { PrismaService } from '../../prisma.service';
+import {
+  CreateWorkspaceMemberArgs,
+  UpdateWorkspaceMemberArgs,
+  DeleteWorkspaceMemberArgs,
+} from './workspace-member.args';
+import { WorkspaceRolesGuard } from '../../guards/workspace-member-role';
+import { UseGuards } from '@nestjs/common';
 
+@UseGuards(WorkspaceRolesGuard)
 @Resolver(() => WorkspaceMember)
 export class WorkspaceMemberResolver {
   constructor(private prisma: PrismaService) {}
@@ -39,24 +47,55 @@ export class WorkspaceMemberResolver {
   }
 
   @Mutation(() => WorkspaceMember, { name: 'createWorkspaceMember' })
+  @WMRoles(WorkspaceMemberRole.ADMIN, WorkspaceMemberRole.OWNER)
   createWorkspaceMember(
-    @Args() createWorkspaceMemberInput: CreateOneWorkspaceMemberArgs,
+    @Args() createWorkspaceMemberArgs: CreateWorkspaceMemberArgs,
   ) {
-    return this.prisma.workspaceMember.create(createWorkspaceMemberInput);
+    const { role, userWhereUniqueInput, workspaceWhereUniqueInput } =
+      createWorkspaceMemberArgs;
+
+    return this.prisma.workspaceMember.create({
+      data: {
+        role,
+        workspace: {
+          connect: {
+            uuid: workspaceWhereUniqueInput.uuid,
+          },
+        },
+        user: {
+          connect: {
+            uuid: userWhereUniqueInput.uuid,
+          },
+        },
+      },
+    });
   }
 
   @Mutation(() => WorkspaceMember, { name: 'updateWorkspaceMember' })
+  @WMRoles(WorkspaceMemberRole.ADMIN, WorkspaceMemberRole.OWNER)
   updateWorkspaceMember(
-    @Args() updateWorkspaceMemberInput: UpdateOneWorkspaceMemberArgs,
+    @Args() updateWorkspaceMemberArgs: UpdateWorkspaceMemberArgs,
   ) {
-    return this.prisma.workspaceMember.update(updateWorkspaceMemberInput);
+    const { role, workspaceMemberWhereUniqueInput } = updateWorkspaceMemberArgs;
+    return this.prisma.workspaceMember.update({
+      where: {
+        uuid: workspaceMemberWhereUniqueInput.uuid,
+      },
+      data: {
+        role,
+      },
+    });
   }
 
   @Mutation(() => WorkspaceMember, { name: 'deleteWorkspaceMember' })
+  @WMRoles(WorkspaceMemberRole.ADMIN, WorkspaceMemberRole.OWNER)
   deleteWorkspaceMember(
-    @Args() deleteWorkspaceMember: DeleteOneWorkspaceMemberArgs,
+    @Args() deleteWorkspaceMemberArgs: DeleteWorkspaceMemberArgs,
   ) {
-    return this.prisma.workspaceMember.delete(deleteWorkspaceMember);
+    const { workspaceMemberWhereUniqueInput } = deleteWorkspaceMemberArgs;
+    return this.prisma.workspaceMember.delete({
+      where: { uuid: workspaceMemberWhereUniqueInput.uuid },
+    });
   }
 
   @ResolveField(() => User)

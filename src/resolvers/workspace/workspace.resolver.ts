@@ -11,17 +11,22 @@ import { CurrentUser, WMRoles } from 'src/decorators';
 import { WorkspaceRolesGuard } from 'src/guards/workspace-member-role';
 import { PrismaService } from 'src/prisma.service';
 import {
-  CreateOneWorkspaceArgs,
   DeleteOneWorkspaceArgs,
   FindUniqueWorkspaceArgs,
   Task,
-  UpdateOneWorkspaceArgs,
   User,
   Workspace,
   WorkspaceMember,
   WorkspaceMemberCreateWithoutWorkspaceInput,
   WorkspaceMemberRole,
-} from '../../../prisma/generated/types';
+} from '../../@generated';
+import {
+  CreateWorkspaceArgs,
+  WorkspacesWhereArgs,
+  UpdateWorkspaceArgs,
+  DeleteWorkspaceArgs,
+  ChangeCurrentWorkspaceArgs,
+} from './workspace.args';
 import { WorkspaceService } from './workspace.service';
 
 @UseGuards(WorkspaceRolesGuard)
@@ -38,14 +43,17 @@ export class WorkspaceResolver {
     WorkspaceMemberRole.USER,
   )
   @Query((returns) => [Workspace], { name: 'workspaces' })
-  findAll(@CurrentUser() user: User) {
+  findAll(
+    @CurrentUser() user: User,
+    @Args() workspacesWhereArgs: WorkspacesWhereArgs,
+  ) {
     return this.prisma.workspace.findMany({
+      ...workspacesWhereArgs,
       where: {
-        members: {
-          some: {
-            userId: user.uuid,
-          },
-        },
+        AND: [
+          workspacesWhereArgs.where,
+          { members: { some: { uuid: user.uuid } } },
+        ],
       },
     });
   }
@@ -71,9 +79,10 @@ export class WorkspaceResolver {
   @Mutation(() => Workspace, { name: 'createWorkspace' })
   createWorkspace(
     @CurrentUser() user: User,
-    @Args() createWorkspaceInput: CreateOneWorkspaceArgs,
+    @Args() createWorkspaceArgs: CreateWorkspaceArgs,
   ) {
-    const { data } = createWorkspaceInput;
+    const { data } = createWorkspaceArgs;
+
     const OWNER: WorkspaceMemberCreateWithoutWorkspaceInput = {
       role: 'OWNER',
       user: {
@@ -87,8 +96,10 @@ export class WorkspaceResolver {
       data: {
         ...data,
         members: {
-          ...data.members,
           create: [OWNER],
+        },
+        taskStatuses: {
+          create: [{ title: 'Backlog' }],
         },
       },
     });
@@ -97,13 +108,17 @@ export class WorkspaceResolver {
   @WMRoles(WorkspaceMemberRole.OWNER, WorkspaceMemberRole.ADMIN)
   async updateWorkspace(
     @CurrentUser() user: User,
-    @Args() updateWorkspaceInput: UpdateOneWorkspaceArgs,
+    @Args() updateWorkspaceArgs: UpdateWorkspaceArgs,
   ) {
+    const { workspaceWhereUniqueInput, data } = updateWorkspaceArgs;
     await this.workspaceService.ensureUserIsWorkspaceOwnerOrAdmin(
-      updateWorkspaceInput.where.uuid,
+      workspaceWhereUniqueInput.uuid,
       user.uuid,
     );
-    return this.prisma.workspace.update(updateWorkspaceInput);
+    return this.prisma.workspace.update({
+      where: workspaceWhereUniqueInput,
+      data,
+    });
   }
 
   @Mutation(() => Workspace, { name: 'removeWorkspace' })
@@ -111,37 +126,39 @@ export class WorkspaceResolver {
   async removeWorkspace(
     @CurrentUser() user: User,
     @Args()
-    deleteOneWorkspaceArgs: DeleteOneWorkspaceArgs,
+    deleteWorkspaceArgs: DeleteWorkspaceArgs,
   ) {
+    const { workspaceWhereUniqueInput } = deleteWorkspaceArgs;
     await this.workspaceService.ensureUserIsWorkspaceOwner(
-      deleteOneWorkspaceArgs.where.uuid,
+      workspaceWhereUniqueInput.uuid,
       user.uuid,
     );
 
-    return this.prisma.workspace.delete(deleteOneWorkspaceArgs);
+    return this.prisma.workspace.delete({ where: workspaceWhereUniqueInput });
   }
 
   @Mutation(() => Workspace, { name: 'changeCurrentWorkspace' })
   async changeCurrentWorkspace(
     @CurrentUser() user: User,
-    @Args('workspaceId') workspaceId: string,
+    @Args() changeCurrentWorkspaceArgs: ChangeCurrentWorkspaceArgs,
   ) {
+    const { workspaceWhereUniqueInput } = changeCurrentWorkspaceArgs;
     await this.workspaceService.ensureUserIsWorkspaceMember(
       user.email,
-      workspaceId,
+      workspaceWhereUniqueInput.uuid,
     );
     await this.prisma.user.update({
       where: {
         uuid: user.uuid,
       },
       data: {
-        currentWorkspaceId: workspaceId,
+        currentWorkspaceId: workspaceWhereUniqueInput.uuid,
       },
     });
 
     return this.prisma.workspace.findUnique({
       where: {
-        uuid: workspaceId,
+        uuid: workspaceWhereUniqueInput.uuid,
       },
     });
   }

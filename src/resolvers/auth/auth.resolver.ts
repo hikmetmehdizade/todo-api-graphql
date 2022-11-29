@@ -4,7 +4,7 @@ import { AuthCookies } from 'src/consts';
 import { CurrentUser, Public } from 'src/decorators';
 import { PrismaService } from 'src/prisma.service';
 import { Ctx } from 'src/types';
-import { User } from '../../../prisma/generated/types';
+import { User } from '../../@generated';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { RegistrationInput } from './auth.types';

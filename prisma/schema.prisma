@@ -10,7 +10,7 @@ generator nestgraphql {
   provider = "node node_modules/prisma-nestjs-graphql"
   // for yarn monorepos
   // provider = "prisma-nestjs-graphql"
-  output   = "./generated/types"
+  output   = "../src/@generated/"
   reExport = All
 }
 

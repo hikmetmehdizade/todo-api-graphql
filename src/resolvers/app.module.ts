@@ -2,6 +2,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
+import { Context } from 'graphql-ws';
 import { join } from 'path';
 import { GqlAuthGuard } from 'src/guards/auth';
 import { LoggingInterceptor } from 'src/interceptors/logging';
@@ -14,6 +15,7 @@ import { UserModule } from './user/user.module';
 import { WorkspaceMemberModule } from './workspace-member/workspace-member.module';
 import { WorkspaceTaskStatusModule } from './workspace-task-status/workspace-task-status.module';
 import { WorkspaceModule } from './workspace/workspace.module';
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [
@@ -22,6 +24,13 @@ import { WorkspaceModule } from './workspace/workspace.module';
       playground: {
         settings: {
           'request.credentials': 'include',
+        },
+      },
+      subscriptions: {
+        'graphql-ws': {
+          onConnect: (context: Context<any>) => {
+            console.log('context', context);
+          },
         },
       },
       cors: {
@@ -44,6 +53,10 @@ import { WorkspaceModule } from './workspace/workspace.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub(),
     },
     {
       provide: APP_GUARD,

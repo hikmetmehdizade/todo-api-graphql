@@ -304,39 +304,28 @@ type WorkspaceTaskStatusMaxAggregate {
 }
 
 type Query {
-  workspaces: [Workspace!]!
+  workspaces(where: WorkspaceWhereInput, orderBy: [WorkspaceOrderByWithRelationInput!], take: Int, skip: Int): [Workspace!]!
   workspace(where: WorkspaceWhereUniqueInput!): Workspace!
   task(where: TaskWhereUniqueInput!): Task!
   tasks(where: TaskWhereInput, orderBy: [TaskOrderByWithRelationInput!], cursor: TaskWhereUniqueInput, take: Int, skip: Int, distinct: [TaskScalarFieldEnum!]): [Task!]!
   workspaceMember(where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
   workspaceMembers(where: WorkspaceMemberWhereInput, orderBy: [WorkspaceMemberOrderByWithRelationInput!], cursor: WorkspaceMemberWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceMemberScalarFieldEnum!]): [WorkspaceMember!]!
-  assignedMember(where: AssignedMemberWhereInput, orderBy: [AssignedMemberOrderByWithRelationInput!], cursor: AssignedMemberWhereUniqueInput, take: Int, skip: Int, distinct: [AssignedMemberScalarFieldEnum!]): [AssignedMember!]!
   me: User!
-  workspaceTaskStatuses: [WorkspaceTaskStatus!]!
+  workspaceTaskStatuses(where: WorkspaceTaskStatusWhereInput, orderBy: [WorkspaceTaskStatusOrderByWithRelationInput!], cursor: WorkspaceTaskStatusWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceTaskStatusScalarFieldEnum!]): [WorkspaceTaskStatus!]!
 }
 
-input WorkspaceWhereUniqueInput {
-  uuid: String
-}
-
-input TaskWhereUniqueInput {
-  uuid: String
-}
-
-input TaskWhereInput {
-  AND: [TaskWhereInput!]
-  OR: [TaskWhereInput!]
-  NOT: [TaskWhereInput!]
+input WorkspaceWhereInput {
+  AND: [WorkspaceWhereInput!]
+  OR: [WorkspaceWhereInput!]
+  NOT: [WorkspaceWhereInput!]
   uuid: StringFilter
-  title: StringFilter
-  description: StringFilter
+  name: StringFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
-  workspace: WorkspaceRelationFilter
-  workspaceId: StringFilter
-  assignedMembers: AssignedMemberListRelationFilter
-  status: WorkspaceTaskStatusRelationFilter
-  statusId: StringFilter
+  members: WorkspaceMemberListRelationFilter
+  tasks: TaskListRelationFilter
+  taskStatuses: WorkspaceTaskStatusListRelationFilter
+  user: UserListRelationFilter
 }
 
 input StringFilter {
@@ -395,25 +384,6 @@ input NestedDateTimeFilter {
   not: NestedDateTimeFilter
 }
 
-input WorkspaceRelationFilter {
-  is: WorkspaceWhereInput
-  isNot: WorkspaceWhereInput
-}
-
-input WorkspaceWhereInput {
-  AND: [WorkspaceWhereInput!]
-  OR: [WorkspaceWhereInput!]
-  NOT: [WorkspaceWhereInput!]
-  uuid: StringFilter
-  name: StringFilter
-  createdAt: DateTimeFilter
-  updatedAt: DateTimeFilter
-  members: WorkspaceMemberListRelationFilter
-  tasks: TaskListRelationFilter
-  taskStatuses: WorkspaceTaskStatusListRelationFilter
-  user: UserListRelationFilter
-}
-
 input WorkspaceMemberListRelationFilter {
   every: WorkspaceMemberWhereInput
   some: WorkspaceMemberWhereInput
@@ -453,6 +423,11 @@ input UserWhereInput {
   workspaceParticipation: WorkspaceMemberListRelationFilter
   currentWorkspace: WorkspaceRelationFilter
   currentWorkspaceId: StringNullableFilter
+}
+
+input WorkspaceRelationFilter {
+  is: WorkspaceWhereInput
+  isNot: WorkspaceWhereInput
 }
 
 input StringNullableFilter {
@@ -525,30 +500,25 @@ input TaskRelationFilter {
   isNot: TaskWhereInput
 }
 
-input EnumTaskRoleFilter {
-  equals: TaskRole
-  in: [TaskRole!]
-  notIn: [TaskRole!]
-  not: NestedEnumTaskRoleFilter
+input TaskWhereInput {
+  AND: [TaskWhereInput!]
+  OR: [TaskWhereInput!]
+  NOT: [TaskWhereInput!]
+  uuid: StringFilter
+  title: StringFilter
+  description: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+  workspace: WorkspaceRelationFilter
+  workspaceId: StringFilter
+  assignedMembers: AssignedMemberListRelationFilter
+  status: WorkspaceTaskStatusRelationFilter
+  statusId: StringFilter
 }
 
-input NestedEnumTaskRoleFilter {
-  equals: TaskRole
-  in: [TaskRole!]
-  notIn: [TaskRole!]
-  not: NestedEnumTaskRoleFilter
-}
-
-input TaskListRelationFilter {
-  every: TaskWhereInput
-  some: TaskWhereInput
-  none: TaskWhereInput
-}
-
-input WorkspaceTaskStatusListRelationFilter {
-  every: WorkspaceTaskStatusWhereInput
-  some: WorkspaceTaskStatusWhereInput
-  none: WorkspaceTaskStatusWhereInput
+input WorkspaceTaskStatusRelationFilter {
+  is: WorkspaceTaskStatusWhereInput
+  isNot: WorkspaceTaskStatusWhereInput
 }
 
 input WorkspaceTaskStatusWhereInput {
@@ -563,6 +533,12 @@ input WorkspaceTaskStatusWhereInput {
   workspaceId: StringFilter
   tasks: TaskListRelationFilter
   order: IntFilter
+}
+
+input TaskListRelationFilter {
+  every: TaskWhereInput
+  some: TaskWhereInput
+  none: TaskWhereInput
 }
 
 input IntFilter {
@@ -587,33 +563,30 @@ input NestedIntFilter {
   not: NestedIntFilter
 }
 
+input EnumTaskRoleFilter {
+  equals: TaskRole
+  in: [TaskRole!]
+  notIn: [TaskRole!]
+  not: NestedEnumTaskRoleFilter
+}
+
+input NestedEnumTaskRoleFilter {
+  equals: TaskRole
+  in: [TaskRole!]
+  notIn: [TaskRole!]
+  not: NestedEnumTaskRoleFilter
+}
+
+input WorkspaceTaskStatusListRelationFilter {
+  every: WorkspaceTaskStatusWhereInput
+  some: WorkspaceTaskStatusWhereInput
+  none: WorkspaceTaskStatusWhereInput
+}
+
 input UserListRelationFilter {
   every: UserWhereInput
   some: UserWhereInput
   none: UserWhereInput
-}
-
-input WorkspaceTaskStatusRelationFilter {
-  is: WorkspaceTaskStatusWhereInput
-  isNot: WorkspaceTaskStatusWhereInput
-}
-
-input TaskOrderByWithRelationInput {
-  uuid: SortOrder
-  title: SortOrder
-  description: SortOrder
-  createdAt: SortOrder
-  updatedAt: SortOrder
-  workspace: WorkspaceOrderByWithRelationInput
-  workspaceId: SortOrder
-  assignedMembers: AssignedMemberOrderByRelationAggregateInput
-  status: WorkspaceTaskStatusOrderByWithRelationInput
-  statusId: SortOrder
-}
-
-enum SortOrder {
-  asc
-  desc
 }
 
 input WorkspaceOrderByWithRelationInput {
@@ -625,6 +598,11 @@ input WorkspaceOrderByWithRelationInput {
   tasks: TaskOrderByRelationAggregateInput
   taskStatuses: WorkspaceTaskStatusOrderByRelationAggregateInput
   user: UserOrderByRelationAggregateInput
+}
+
+enum SortOrder {
+  asc
+  desc
 }
 
 input WorkspaceMemberOrderByRelationAggregateInput {
@@ -641,6 +619,27 @@ input WorkspaceTaskStatusOrderByRelationAggregateInput {
 
 input UserOrderByRelationAggregateInput {
   _count: SortOrder
+}
+
+input WorkspaceWhereUniqueInput {
+  uuid: String
+}
+
+input TaskWhereUniqueInput {
+  uuid: String
+}
+
+input TaskOrderByWithRelationInput {
+  uuid: SortOrder
+  title: SortOrder
+  description: SortOrder
+  createdAt: SortOrder
+  updatedAt: SortOrder
+  workspace: WorkspaceOrderByWithRelationInput
+  workspaceId: SortOrder
+  assignedMembers: AssignedMemberOrderByRelationAggregateInput
+  status: WorkspaceTaskStatusOrderByWithRelationInput
+  statusId: SortOrder
 }
 
 input AssignedMemberOrderByRelationAggregateInput {
@@ -705,74 +704,99 @@ enum WorkspaceMemberScalarFieldEnum {
   updatedAt
 }
 
-input AssignedMemberOrderByWithRelationInput {
-  memberId: SortOrder
-  member: WorkspaceMemberOrderByWithRelationInput
-  taskId: SortOrder
-  task: TaskOrderByWithRelationInput
-  role: SortOrder
+input WorkspaceTaskStatusWhereUniqueInput {
+  uuid: String
 }
 
-input AssignedMemberWhereUniqueInput {
-  memberId_taskId: AssignedMemberMemberIdTaskIdCompoundUniqueInput
-}
-
-input AssignedMemberMemberIdTaskIdCompoundUniqueInput {
-  memberId: String!
-  taskId: String!
-}
-
-enum AssignedMemberScalarFieldEnum {
-  memberId
-  taskId
-  role
+enum WorkspaceTaskStatusScalarFieldEnum {
+  uuid
+  title
+  createdAt
+  updatedAt
+  workspaceId
+  order
 }
 
 type Mutation {
-  createWorkspace(data: WorkspaceCreateInput!): Workspace!
-  updateWorkspace(data: WorkspaceUpdateInput!, where: WorkspaceWhereUniqueInput!): Workspace!
-  removeWorkspace(where: WorkspaceWhereUniqueInput!): Workspace!
-  changeCurrentWorkspace(workspaceId: String!): Workspace!
-  createTask(data: TaskCreateInput!): Task!
-  updateTask(data: TaskUpdateInput!, where: TaskWhereUniqueInput!): Task!
-  deleteTask(where: TaskWhereUniqueInput!): Task!
-  createWorkspaceMember(data: WorkspaceMemberCreateInput!): WorkspaceMember!
-  updateWorkspaceMember(data: WorkspaceMemberUpdateInput!, where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
-  deleteWorkspaceMember(where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
-  createAssignedMember(data: AssignedMemberCreateInput!): AssignedMember!
-  updateAssignedMember(data: AssignedMemberUpdateInput!, where: AssignedMemberWhereUniqueInput!): AssignedMember!
-  deleteAssignedMember(where: AssignedMemberWhereUniqueInput!): AssignedMember!
+  createWorkspace(data: CreateWorkspaceInputData!): Workspace!
+  updateWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, data: UpdateWorkspaceInputData!): Workspace!
+  removeWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): Workspace!
+  changeCurrentWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): Workspace!
+  createTask(data: CreateTaskInputData!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, members: [ConnectWorkspaceMemberInputType!]!): Task!
+  updateTask(data: UpdateTaskInputType!, taskWhereUniqueInput: TaskWhereUniqueInput!): Task!
+  deleteTask(taskWhereUniqueInput: TaskWhereUniqueInput!): Task!
+  createWorkspaceMember(role: WorkspaceMemberRole!, userWhereUniqueInput: UserWhereUniqueInput!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
+  updateWorkspaceMember(role: WorkspaceMemberRole!, workspaceMemberWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
+  deleteWorkspaceMember(workspaceMemberWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
+  createAssignedMember(role: TaskRole = EXECUTOR, workspaceMemberWhereUniqueInput: WorkspaceMemberWhereUniqueInput!, taskWhereUniqueInput: TaskWhereUniqueInput!): AssignedMember!
+  updateAssignedMember(role: TaskRole!, assignedMemberWhereUniqueInput: AssignedMemberWhereUniqueInput!): AssignedMember!
+  deleteAssignedMember(assignedMemberWhereUniqueInput: AssignedMemberWhereUniqueInput!): AssignedMember!
   login(email: String!, password: String!): User!
   registration(data: RegistrationInput!): User!
   logout: Boolean!
-  createWorkspaceTaskStatus(data: WorkspaceTaskStatusCreateInput!): WorkspaceTaskStatus!
+  createWorkspaceTaskStatus(data: WorkspaceTaskStatusCreateInput!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput): WorkspaceTaskStatus!
 }
 
-input WorkspaceCreateInput {
-  uuid: String
+input CreateWorkspaceInputData {
   name: String!
-  createdAt: DateTime
-  updatedAt: DateTime
-  members: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
-  tasks: TaskCreateNestedManyWithoutWorkspaceInput
-  taskStatuses: WorkspaceTaskStatusCreateNestedManyWithoutWorkspaceInput
-  user: UserCreateNestedManyWithoutCurrentWorkspaceInput
 }
 
-input WorkspaceMemberCreateNestedManyWithoutWorkspaceInput {
-  create: [WorkspaceMemberCreateWithoutWorkspaceInput!]
-  connectOrCreate: [WorkspaceMemberCreateOrConnectWithoutWorkspaceInput!]
-  createMany: WorkspaceMemberCreateManyWorkspaceInputEnvelope
-  connect: [WorkspaceMemberWhereUniqueInput!]
+input UpdateWorkspaceInputData {
+  name: StringFieldUpdateOperationsInput
 }
 
-input WorkspaceMemberCreateWithoutWorkspaceInput {
+input StringFieldUpdateOperationsInput {
+  set: String
+}
+
+input CreateTaskInputData {
+  title: String!
+  description: String
+}
+
+input ConnectWorkspaceMemberInputType {
+  role: TaskRole!
+  workspaceMemberWhereUniqueInput: WorkspaceMemberWhereUniqueInput!
+}
+
+input UpdateTaskInputType {
+  title: StringFieldUpdateOperationsInput
+  description: StringFieldUpdateOperationsInput
+  status: WorkspaceTaskStatusConnectInputType
+  assignedMembers: AssignedMemberUpdateManyWithoutTaskNestedInputType
+}
+
+input WorkspaceTaskStatusConnectInputType {
+  connect: WorkspaceTaskStatusWhereUniqueInput
+}
+
+input AssignedMemberUpdateManyWithoutTaskNestedInputType {
+  create: [AssignedMemberCreateWithoutTaskInput!]
+  createMany: AssignedMemberCreateManyTaskInputEnvelope
+  delete: [AssignedMemberWhereUniqueInput!]
+  update: [AssignedMemberUpdateWithWhereUniqueWithoutTaskInput!]
+  updateMany: [AssignedMemberUpdateManyWithWhereWithoutTaskInput!]
+  deleteMany: [AssignedMemberScalarWhereInput!]
+}
+
+input AssignedMemberCreateWithoutTaskInput {
+  member: WorkspaceMemberCreateNestedOneWithoutTasksInput!
+  role: TaskRole
+}
+
+input WorkspaceMemberCreateNestedOneWithoutTasksInput {
+  create: WorkspaceMemberCreateWithoutTasksInput
+  connectOrCreate: WorkspaceMemberCreateOrConnectWithoutTasksInput
+  connect: WorkspaceMemberWhereUniqueInput
+}
+
+input WorkspaceMemberCreateWithoutTasksInput {
   uuid: String
   user: UserCreateNestedOneWithoutWorkspaceParticipationInput!
+  workspace: WorkspaceCreateNestedOneWithoutMembersInput!
   role: WorkspaceMemberRole
   createdAt: DateTime
   updatedAt: DateTime
-  tasks: AssignedMemberCreateNestedManyWithoutMemberInput
 }
 
 input UserCreateNestedOneWithoutWorkspaceParticipationInput {
@@ -807,62 +831,62 @@ input WorkspaceCreateWithoutUserInput {
   taskStatuses: WorkspaceTaskStatusCreateNestedManyWithoutWorkspaceInput
 }
 
-input TaskCreateNestedManyWithoutWorkspaceInput {
-  create: [TaskCreateWithoutWorkspaceInput!]
-  connectOrCreate: [TaskCreateOrConnectWithoutWorkspaceInput!]
-  createMany: TaskCreateManyWorkspaceInputEnvelope
-  connect: [TaskWhereUniqueInput!]
+input WorkspaceMemberCreateNestedManyWithoutWorkspaceInput {
+  create: [WorkspaceMemberCreateWithoutWorkspaceInput!]
+  connectOrCreate: [WorkspaceMemberCreateOrConnectWithoutWorkspaceInput!]
+  createMany: WorkspaceMemberCreateManyWorkspaceInputEnvelope
+  connect: [WorkspaceMemberWhereUniqueInput!]
 }
 
-input TaskCreateWithoutWorkspaceInput {
+input WorkspaceMemberCreateWithoutWorkspaceInput {
+  uuid: String
+  user: UserCreateNestedOneWithoutWorkspaceParticipationInput!
+  role: WorkspaceMemberRole
+  createdAt: DateTime
+  updatedAt: DateTime
+  tasks: AssignedMemberCreateNestedManyWithoutMemberInput
+}
+
+input AssignedMemberCreateNestedManyWithoutMemberInput {
+  create: [AssignedMemberCreateWithoutMemberInput!]
+  connectOrCreate: [AssignedMemberCreateOrConnectWithoutMemberInput!]
+  createMany: AssignedMemberCreateManyMemberInputEnvelope
+  connect: [AssignedMemberWhereUniqueInput!]
+}
+
+input AssignedMemberCreateWithoutMemberInput {
+  task: TaskCreateNestedOneWithoutAssignedMembersInput!
+  role: TaskRole
+}
+
+input TaskCreateNestedOneWithoutAssignedMembersInput {
+  create: TaskCreateWithoutAssignedMembersInput
+  connectOrCreate: TaskCreateOrConnectWithoutAssignedMembersInput
+  connect: TaskWhereUniqueInput
+}
+
+input TaskCreateWithoutAssignedMembersInput {
   uuid: String
   title: String!
   description: String
   createdAt: DateTime
   updatedAt: DateTime
-  assignedMembers: AssignedMemberCreateNestedManyWithoutTaskInput
+  workspace: WorkspaceCreateNestedOneWithoutTasksInput!
   status: WorkspaceTaskStatusCreateNestedOneWithoutTasksInput!
 }
 
-input AssignedMemberCreateNestedManyWithoutTaskInput {
-  create: [AssignedMemberCreateWithoutTaskInput!]
-  connectOrCreate: [AssignedMemberCreateOrConnectWithoutTaskInput!]
-  createMany: AssignedMemberCreateManyTaskInputEnvelope
-  connect: [AssignedMemberWhereUniqueInput!]
-}
-
-input AssignedMemberCreateWithoutTaskInput {
-  member: WorkspaceMemberCreateNestedOneWithoutTasksInput!
-  role: TaskRole
-}
-
-input WorkspaceMemberCreateNestedOneWithoutTasksInput {
-  create: WorkspaceMemberCreateWithoutTasksInput
-  connectOrCreate: WorkspaceMemberCreateOrConnectWithoutTasksInput
-  connect: WorkspaceMemberWhereUniqueInput
-}
-
-input WorkspaceMemberCreateWithoutTasksInput {
-  uuid: String
-  user: UserCreateNestedOneWithoutWorkspaceParticipationInput!
-  workspace: WorkspaceCreateNestedOneWithoutMembersInput!
-  role: WorkspaceMemberRole
-  createdAt: DateTime
-  updatedAt: DateTime
-}
-
-input WorkspaceCreateNestedOneWithoutMembersInput {
-  create: WorkspaceCreateWithoutMembersInput
-  connectOrCreate: WorkspaceCreateOrConnectWithoutMembersInput
+input WorkspaceCreateNestedOneWithoutTasksInput {
+  create: WorkspaceCreateWithoutTasksInput
+  connectOrCreate: WorkspaceCreateOrConnectWithoutTasksInput
   connect: WorkspaceWhereUniqueInput
 }
 
-input WorkspaceCreateWithoutMembersInput {
+input WorkspaceCreateWithoutTasksInput {
   uuid: String
   name: String!
   createdAt: DateTime
   updatedAt: DateTime
-  tasks: TaskCreateNestedManyWithoutWorkspaceInput
+  members: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
   taskStatuses: WorkspaceTaskStatusCreateNestedManyWithoutWorkspaceInput
   user: UserCreateNestedManyWithoutCurrentWorkspaceInput
 }
@@ -900,20 +924,72 @@ input TaskCreateWithoutStatusInput {
   assignedMembers: AssignedMemberCreateNestedManyWithoutTaskInput
 }
 
-input WorkspaceCreateNestedOneWithoutTasksInput {
-  create: WorkspaceCreateWithoutTasksInput
-  connectOrCreate: WorkspaceCreateOrConnectWithoutTasksInput
-  connect: WorkspaceWhereUniqueInput
+input AssignedMemberCreateNestedManyWithoutTaskInput {
+  create: [AssignedMemberCreateWithoutTaskInput!]
+  connectOrCreate: [AssignedMemberCreateOrConnectWithoutTaskInput!]
+  createMany: AssignedMemberCreateManyTaskInputEnvelope
+  connect: [AssignedMemberWhereUniqueInput!]
 }
 
-input WorkspaceCreateWithoutTasksInput {
+input AssignedMemberCreateOrConnectWithoutTaskInput {
+  where: AssignedMemberWhereUniqueInput!
+  create: AssignedMemberCreateWithoutTaskInput!
+}
+
+input AssignedMemberWhereUniqueInput {
+  memberId_taskId: AssignedMemberMemberIdTaskIdCompoundUniqueInput
+}
+
+input AssignedMemberMemberIdTaskIdCompoundUniqueInput {
+  memberId: String!
+  taskId: String!
+}
+
+input AssignedMemberCreateManyTaskInputEnvelope {
+  data: [AssignedMemberCreateManyTaskInput!]!
+  skipDuplicates: Boolean
+}
+
+input AssignedMemberCreateManyTaskInput {
+  memberId: String!
+  role: TaskRole
+}
+
+input TaskCreateOrConnectWithoutStatusInput {
+  where: TaskWhereUniqueInput!
+  create: TaskCreateWithoutStatusInput!
+}
+
+input TaskCreateManyStatusInputEnvelope {
+  data: [TaskCreateManyStatusInput!]!
+  skipDuplicates: Boolean
+}
+
+input TaskCreateManyStatusInput {
   uuid: String
-  name: String!
+  title: String!
+  description: String
   createdAt: DateTime
   updatedAt: DateTime
-  members: WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
-  taskStatuses: WorkspaceTaskStatusCreateNestedManyWithoutWorkspaceInput
-  user: UserCreateNestedManyWithoutCurrentWorkspaceInput
+  workspaceId: String!
+}
+
+input WorkspaceTaskStatusCreateOrConnectWithoutWorkspaceInput {
+  where: WorkspaceTaskStatusWhereUniqueInput!
+  create: WorkspaceTaskStatusCreateWithoutWorkspaceInput!
+}
+
+input WorkspaceTaskStatusCreateManyWorkspaceInputEnvelope {
+  data: [WorkspaceTaskStatusCreateManyWorkspaceInput!]!
+  skipDuplicates: Boolean
+}
+
+input WorkspaceTaskStatusCreateManyWorkspaceInput {
+  uuid: String
+  title: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  order: Int
 }
 
 input UserCreateNestedManyWithoutCurrentWorkspaceInput {
@@ -949,31 +1025,36 @@ input WorkspaceMemberCreateWithoutUserInput {
   tasks: AssignedMemberCreateNestedManyWithoutMemberInput
 }
 
-input AssignedMemberCreateNestedManyWithoutMemberInput {
-  create: [AssignedMemberCreateWithoutMemberInput!]
-  connectOrCreate: [AssignedMemberCreateOrConnectWithoutMemberInput!]
-  createMany: AssignedMemberCreateManyMemberInputEnvelope
-  connect: [AssignedMemberWhereUniqueInput!]
+input WorkspaceCreateNestedOneWithoutMembersInput {
+  create: WorkspaceCreateWithoutMembersInput
+  connectOrCreate: WorkspaceCreateOrConnectWithoutMembersInput
+  connect: WorkspaceWhereUniqueInput
 }
 
-input AssignedMemberCreateWithoutMemberInput {
-  task: TaskCreateNestedOneWithoutAssignedMembersInput!
-  role: TaskRole
+input WorkspaceCreateWithoutMembersInput {
+  uuid: String
+  name: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  tasks: TaskCreateNestedManyWithoutWorkspaceInput
+  taskStatuses: WorkspaceTaskStatusCreateNestedManyWithoutWorkspaceInput
+  user: UserCreateNestedManyWithoutCurrentWorkspaceInput
 }
 
-input TaskCreateNestedOneWithoutAssignedMembersInput {
-  create: TaskCreateWithoutAssignedMembersInput
-  connectOrCreate: TaskCreateOrConnectWithoutAssignedMembersInput
-  connect: TaskWhereUniqueInput
+input TaskCreateNestedManyWithoutWorkspaceInput {
+  create: [TaskCreateWithoutWorkspaceInput!]
+  connectOrCreate: [TaskCreateOrConnectWithoutWorkspaceInput!]
+  createMany: TaskCreateManyWorkspaceInputEnvelope
+  connect: [TaskWhereUniqueInput!]
 }
 
-input TaskCreateWithoutAssignedMembersInput {
+input TaskCreateWithoutWorkspaceInput {
   uuid: String
   title: String!
   description: String
   createdAt: DateTime
   updatedAt: DateTime
-  workspace: WorkspaceCreateNestedOneWithoutTasksInput!
+  assignedMembers: AssignedMemberCreateNestedManyWithoutTaskInput
   status: WorkspaceTaskStatusCreateNestedOneWithoutTasksInput!
 }
 
@@ -1018,28 +1099,28 @@ input WorkspaceTaskStatusCreateOrConnectWithoutTasksInput {
   create: WorkspaceTaskStatusCreateWithoutTasksInput!
 }
 
-input WorkspaceTaskStatusWhereUniqueInput {
-  uuid: String
-}
-
-input TaskCreateOrConnectWithoutAssignedMembersInput {
+input TaskCreateOrConnectWithoutWorkspaceInput {
   where: TaskWhereUniqueInput!
-  create: TaskCreateWithoutAssignedMembersInput!
+  create: TaskCreateWithoutWorkspaceInput!
 }
 
-input AssignedMemberCreateOrConnectWithoutMemberInput {
-  where: AssignedMemberWhereUniqueInput!
-  create: AssignedMemberCreateWithoutMemberInput!
-}
-
-input AssignedMemberCreateManyMemberInputEnvelope {
-  data: [AssignedMemberCreateManyMemberInput!]!
+input TaskCreateManyWorkspaceInputEnvelope {
+  data: [TaskCreateManyWorkspaceInput!]!
   skipDuplicates: Boolean
 }
 
-input AssignedMemberCreateManyMemberInput {
-  taskId: String!
-  role: TaskRole
+input TaskCreateManyWorkspaceInput {
+  uuid: String
+  title: String!
+  description: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  statusId: String!
+}
+
+input WorkspaceCreateOrConnectWithoutMembersInput {
+  where: WorkspaceWhereUniqueInput!
+  create: WorkspaceCreateWithoutMembersInput!
 }
 
 input WorkspaceMemberCreateOrConnectWithoutUserInput {
@@ -1089,95 +1170,24 @@ input WorkspaceCreateOrConnectWithoutTasksInput {
   create: WorkspaceCreateWithoutTasksInput!
 }
 
-input TaskCreateOrConnectWithoutStatusInput {
+input TaskCreateOrConnectWithoutAssignedMembersInput {
   where: TaskWhereUniqueInput!
-  create: TaskCreateWithoutStatusInput!
+  create: TaskCreateWithoutAssignedMembersInput!
 }
 
-input TaskCreateManyStatusInputEnvelope {
-  data: [TaskCreateManyStatusInput!]!
-  skipDuplicates: Boolean
-}
-
-input TaskCreateManyStatusInput {
-  uuid: String
-  title: String!
-  description: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  workspaceId: String!
-}
-
-input WorkspaceTaskStatusCreateOrConnectWithoutWorkspaceInput {
-  where: WorkspaceTaskStatusWhereUniqueInput!
-  create: WorkspaceTaskStatusCreateWithoutWorkspaceInput!
-}
-
-input WorkspaceTaskStatusCreateManyWorkspaceInputEnvelope {
-  data: [WorkspaceTaskStatusCreateManyWorkspaceInput!]!
-  skipDuplicates: Boolean
-}
-
-input WorkspaceTaskStatusCreateManyWorkspaceInput {
-  uuid: String
-  title: String!
-  createdAt: DateTime
-  updatedAt: DateTime
-  order: Int
-}
-
-input WorkspaceCreateOrConnectWithoutMembersInput {
-  where: WorkspaceWhereUniqueInput!
-  create: WorkspaceCreateWithoutMembersInput!
-}
-
-input WorkspaceMemberCreateOrConnectWithoutTasksInput {
-  where: WorkspaceMemberWhereUniqueInput!
-  create: WorkspaceMemberCreateWithoutTasksInput!
-}
-
-input AssignedMemberCreateOrConnectWithoutTaskInput {
+input AssignedMemberCreateOrConnectWithoutMemberInput {
   where: AssignedMemberWhereUniqueInput!
-  create: AssignedMemberCreateWithoutTaskInput!
+  create: AssignedMemberCreateWithoutMemberInput!
 }
 
-input AssignedMemberCreateManyTaskInputEnvelope {
-  data: [AssignedMemberCreateManyTaskInput!]!
+input AssignedMemberCreateManyMemberInputEnvelope {
+  data: [AssignedMemberCreateManyMemberInput!]!
   skipDuplicates: Boolean
 }
 
-input AssignedMemberCreateManyTaskInput {
-  memberId: String!
+input AssignedMemberCreateManyMemberInput {
+  taskId: String!
   role: TaskRole
-}
-
-input TaskCreateOrConnectWithoutWorkspaceInput {
-  where: TaskWhereUniqueInput!
-  create: TaskCreateWithoutWorkspaceInput!
-}
-
-input TaskCreateManyWorkspaceInputEnvelope {
-  data: [TaskCreateManyWorkspaceInput!]!
-  skipDuplicates: Boolean
-}
-
-input TaskCreateManyWorkspaceInput {
-  uuid: String
-  title: String!
-  description: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  statusId: String!
-}
-
-input WorkspaceCreateOrConnectWithoutUserInput {
-  where: WorkspaceWhereUniqueInput!
-  create: WorkspaceCreateWithoutUserInput!
-}
-
-input UserCreateOrConnectWithoutWorkspaceParticipationInput {
-  where: UserWhereUniqueInput!
-  create: UserCreateWithoutWorkspaceParticipationInput!
 }
 
 input WorkspaceMemberCreateOrConnectWithoutWorkspaceInput {
@@ -1198,7 +1208,96 @@ input WorkspaceMemberCreateManyWorkspaceInput {
   updatedAt: DateTime
 }
 
-input WorkspaceUpdateInput {
+input WorkspaceCreateOrConnectWithoutUserInput {
+  where: WorkspaceWhereUniqueInput!
+  create: WorkspaceCreateWithoutUserInput!
+}
+
+input UserCreateOrConnectWithoutWorkspaceParticipationInput {
+  where: UserWhereUniqueInput!
+  create: UserCreateWithoutWorkspaceParticipationInput!
+}
+
+input WorkspaceMemberCreateOrConnectWithoutTasksInput {
+  where: WorkspaceMemberWhereUniqueInput!
+  create: WorkspaceMemberCreateWithoutTasksInput!
+}
+
+input AssignedMemberUpdateWithWhereUniqueWithoutTaskInput {
+  where: AssignedMemberWhereUniqueInput!
+  data: AssignedMemberUpdateWithoutTaskInput!
+}
+
+input AssignedMemberUpdateWithoutTaskInput {
+  member: WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput
+  role: EnumTaskRoleFieldUpdateOperationsInput
+}
+
+input WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput {
+  create: WorkspaceMemberCreateWithoutTasksInput
+  connectOrCreate: WorkspaceMemberCreateOrConnectWithoutTasksInput
+  upsert: WorkspaceMemberUpsertWithoutTasksInput
+  connect: WorkspaceMemberWhereUniqueInput
+  update: WorkspaceMemberUpdateWithoutTasksInput
+}
+
+input WorkspaceMemberUpsertWithoutTasksInput {
+  update: WorkspaceMemberUpdateWithoutTasksInput!
+  create: WorkspaceMemberCreateWithoutTasksInput!
+}
+
+input WorkspaceMemberUpdateWithoutTasksInput {
+  uuid: StringFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutWorkspaceParticipationNestedInput
+  workspace: WorkspaceUpdateOneRequiredWithoutMembersNestedInput
+  role: EnumWorkspaceMemberRoleFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserUpdateOneRequiredWithoutWorkspaceParticipationNestedInput {
+  create: UserCreateWithoutWorkspaceParticipationInput
+  connectOrCreate: UserCreateOrConnectWithoutWorkspaceParticipationInput
+  upsert: UserUpsertWithoutWorkspaceParticipationInput
+  connect: UserWhereUniqueInput
+  update: UserUpdateWithoutWorkspaceParticipationInput
+}
+
+input UserUpsertWithoutWorkspaceParticipationInput {
+  update: UserUpdateWithoutWorkspaceParticipationInput!
+  create: UserCreateWithoutWorkspaceParticipationInput!
+}
+
+input UserUpdateWithoutWorkspaceParticipationInput {
+  uuid: StringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  firstName: StringFieldUpdateOperationsInput
+  lastName: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  currentWorkspace: WorkspaceUpdateOneWithoutUserNestedInput
+}
+
+input DateTimeFieldUpdateOperationsInput {
+  set: DateTime
+}
+
+input WorkspaceUpdateOneWithoutUserNestedInput {
+  create: WorkspaceCreateWithoutUserInput
+  connectOrCreate: WorkspaceCreateOrConnectWithoutUserInput
+  upsert: WorkspaceUpsertWithoutUserInput
+  disconnect: Boolean
+  delete: Boolean
+  connect: WorkspaceWhereUniqueInput
+  update: WorkspaceUpdateWithoutUserInput
+}
+
+input WorkspaceUpsertWithoutUserInput {
+  update: WorkspaceUpdateWithoutUserInput!
+  create: WorkspaceCreateWithoutUserInput!
+}
+
+input WorkspaceUpdateWithoutUserInput {
   uuid: StringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
@@ -1206,15 +1305,6 @@ input WorkspaceUpdateInput {
   members: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
   tasks: TaskUpdateManyWithoutWorkspaceNestedInput
   taskStatuses: WorkspaceTaskStatusUpdateManyWithoutWorkspaceNestedInput
-  user: UserUpdateManyWithoutCurrentWorkspaceNestedInput
-}
-
-input StringFieldUpdateOperationsInput {
-  set: String
-}
-
-input DateTimeFieldUpdateOperationsInput {
-  set: DateTime
 }
 
 input WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput {
@@ -1246,150 +1336,77 @@ input WorkspaceMemberUpdateWithoutWorkspaceInput {
   tasks: AssignedMemberUpdateManyWithoutMemberNestedInput
 }
 
-input UserUpdateOneRequiredWithoutWorkspaceParticipationNestedInput {
-  create: UserCreateWithoutWorkspaceParticipationInput
-  connectOrCreate: UserCreateOrConnectWithoutWorkspaceParticipationInput
-  upsert: UserUpsertWithoutWorkspaceParticipationInput
-  connect: UserWhereUniqueInput
-  update: UserUpdateWithoutWorkspaceParticipationInput
+input EnumWorkspaceMemberRoleFieldUpdateOperationsInput {
+  set: WorkspaceMemberRole
 }
 
-input UserUpsertWithoutWorkspaceParticipationInput {
-  update: UserUpdateWithoutWorkspaceParticipationInput!
-  create: UserCreateWithoutWorkspaceParticipationInput!
+input AssignedMemberUpdateManyWithoutMemberNestedInput {
+  create: [AssignedMemberCreateWithoutMemberInput!]
+  connectOrCreate: [AssignedMemberCreateOrConnectWithoutMemberInput!]
+  upsert: [AssignedMemberUpsertWithWhereUniqueWithoutMemberInput!]
+  createMany: AssignedMemberCreateManyMemberInputEnvelope
+  set: [AssignedMemberWhereUniqueInput!]
+  disconnect: [AssignedMemberWhereUniqueInput!]
+  delete: [AssignedMemberWhereUniqueInput!]
+  connect: [AssignedMemberWhereUniqueInput!]
+  update: [AssignedMemberUpdateWithWhereUniqueWithoutMemberInput!]
+  updateMany: [AssignedMemberUpdateManyWithWhereWithoutMemberInput!]
+  deleteMany: [AssignedMemberScalarWhereInput!]
 }
 
-input UserUpdateWithoutWorkspaceParticipationInput {
-  uuid: StringFieldUpdateOperationsInput
-  email: StringFieldUpdateOperationsInput
-  firstName: StringFieldUpdateOperationsInput
-  lastName: StringFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-  currentWorkspace: WorkspaceUpdateOneWithoutUserNestedInput
+input AssignedMemberUpsertWithWhereUniqueWithoutMemberInput {
+  where: AssignedMemberWhereUniqueInput!
+  update: AssignedMemberUpdateWithoutMemberInput!
+  create: AssignedMemberCreateWithoutMemberInput!
 }
 
-input WorkspaceUpdateOneWithoutUserNestedInput {
-  create: WorkspaceCreateWithoutUserInput
-  connectOrCreate: WorkspaceCreateOrConnectWithoutUserInput
-  upsert: WorkspaceUpsertWithoutUserInput
-  disconnect: Boolean
-  delete: Boolean
-  connect: WorkspaceWhereUniqueInput
-  update: WorkspaceUpdateWithoutUserInput
+input AssignedMemberUpdateWithoutMemberInput {
+  task: TaskUpdateOneRequiredWithoutAssignedMembersNestedInput
+  role: EnumTaskRoleFieldUpdateOperationsInput
 }
 
-input WorkspaceUpsertWithoutUserInput {
-  update: WorkspaceUpdateWithoutUserInput!
-  create: WorkspaceCreateWithoutUserInput!
+input TaskUpdateOneRequiredWithoutAssignedMembersNestedInput {
+  create: TaskCreateWithoutAssignedMembersInput
+  connectOrCreate: TaskCreateOrConnectWithoutAssignedMembersInput
+  upsert: TaskUpsertWithoutAssignedMembersInput
+  connect: TaskWhereUniqueInput
+  update: TaskUpdateWithoutAssignedMembersInput
 }
 
-input WorkspaceUpdateWithoutUserInput {
-  uuid: StringFieldUpdateOperationsInput
-  name: StringFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-  members: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
-  tasks: TaskUpdateManyWithoutWorkspaceNestedInput
-  taskStatuses: WorkspaceTaskStatusUpdateManyWithoutWorkspaceNestedInput
+input TaskUpsertWithoutAssignedMembersInput {
+  update: TaskUpdateWithoutAssignedMembersInput!
+  create: TaskCreateWithoutAssignedMembersInput!
 }
 
-input TaskUpdateManyWithoutWorkspaceNestedInput {
-  create: [TaskCreateWithoutWorkspaceInput!]
-  connectOrCreate: [TaskCreateOrConnectWithoutWorkspaceInput!]
-  upsert: [TaskUpsertWithWhereUniqueWithoutWorkspaceInput!]
-  createMany: TaskCreateManyWorkspaceInputEnvelope
-  set: [TaskWhereUniqueInput!]
-  disconnect: [TaskWhereUniqueInput!]
-  delete: [TaskWhereUniqueInput!]
-  connect: [TaskWhereUniqueInput!]
-  update: [TaskUpdateWithWhereUniqueWithoutWorkspaceInput!]
-  updateMany: [TaskUpdateManyWithWhereWithoutWorkspaceInput!]
-  deleteMany: [TaskScalarWhereInput!]
-}
-
-input TaskUpsertWithWhereUniqueWithoutWorkspaceInput {
-  where: TaskWhereUniqueInput!
-  update: TaskUpdateWithoutWorkspaceInput!
-  create: TaskCreateWithoutWorkspaceInput!
-}
-
-input TaskUpdateWithoutWorkspaceInput {
+input TaskUpdateWithoutAssignedMembersInput {
   uuid: StringFieldUpdateOperationsInput
   title: StringFieldUpdateOperationsInput
   description: StringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
-  assignedMembers: AssignedMemberUpdateManyWithoutTaskNestedInput
+  workspace: WorkspaceUpdateOneRequiredWithoutTasksNestedInput
   status: WorkspaceTaskStatusUpdateOneRequiredWithoutTasksNestedInput
 }
 
-input AssignedMemberUpdateManyWithoutTaskNestedInput {
-  create: [AssignedMemberCreateWithoutTaskInput!]
-  connectOrCreate: [AssignedMemberCreateOrConnectWithoutTaskInput!]
-  upsert: [AssignedMemberUpsertWithWhereUniqueWithoutTaskInput!]
-  createMany: AssignedMemberCreateManyTaskInputEnvelope
-  set: [AssignedMemberWhereUniqueInput!]
-  disconnect: [AssignedMemberWhereUniqueInput!]
-  delete: [AssignedMemberWhereUniqueInput!]
-  connect: [AssignedMemberWhereUniqueInput!]
-  update: [AssignedMemberUpdateWithWhereUniqueWithoutTaskInput!]
-  updateMany: [AssignedMemberUpdateManyWithWhereWithoutTaskInput!]
-  deleteMany: [AssignedMemberScalarWhereInput!]
-}
-
-input AssignedMemberUpsertWithWhereUniqueWithoutTaskInput {
-  where: AssignedMemberWhereUniqueInput!
-  update: AssignedMemberUpdateWithoutTaskInput!
-  create: AssignedMemberCreateWithoutTaskInput!
-}
-
-input AssignedMemberUpdateWithoutTaskInput {
-  member: WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput
-  role: EnumTaskRoleFieldUpdateOperationsInput
-}
-
-input WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput {
-  create: WorkspaceMemberCreateWithoutTasksInput
-  connectOrCreate: WorkspaceMemberCreateOrConnectWithoutTasksInput
-  upsert: WorkspaceMemberUpsertWithoutTasksInput
-  connect: WorkspaceMemberWhereUniqueInput
-  update: WorkspaceMemberUpdateWithoutTasksInput
-}
-
-input WorkspaceMemberUpsertWithoutTasksInput {
-  update: WorkspaceMemberUpdateWithoutTasksInput!
-  create: WorkspaceMemberCreateWithoutTasksInput!
-}
-
-input WorkspaceMemberUpdateWithoutTasksInput {
-  uuid: StringFieldUpdateOperationsInput
-  user: UserUpdateOneRequiredWithoutWorkspaceParticipationNestedInput
-  workspace: WorkspaceUpdateOneRequiredWithoutMembersNestedInput
-  role: EnumWorkspaceMemberRoleFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-}
-
-input WorkspaceUpdateOneRequiredWithoutMembersNestedInput {
-  create: WorkspaceCreateWithoutMembersInput
-  connectOrCreate: WorkspaceCreateOrConnectWithoutMembersInput
-  upsert: WorkspaceUpsertWithoutMembersInput
+input WorkspaceUpdateOneRequiredWithoutTasksNestedInput {
+  create: WorkspaceCreateWithoutTasksInput
+  connectOrCreate: WorkspaceCreateOrConnectWithoutTasksInput
+  upsert: WorkspaceUpsertWithoutTasksInput
   connect: WorkspaceWhereUniqueInput
-  update: WorkspaceUpdateWithoutMembersInput
+  update: WorkspaceUpdateWithoutTasksInput
 }
 
-input WorkspaceUpsertWithoutMembersInput {
-  update: WorkspaceUpdateWithoutMembersInput!
-  create: WorkspaceCreateWithoutMembersInput!
+input WorkspaceUpsertWithoutTasksInput {
+  update: WorkspaceUpdateWithoutTasksInput!
+  create: WorkspaceCreateWithoutTasksInput!
 }
 
-input WorkspaceUpdateWithoutMembersInput {
+input WorkspaceUpdateWithoutTasksInput {
   uuid: StringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
-  tasks: TaskUpdateManyWithoutWorkspaceNestedInput
+  members: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
   taskStatuses: WorkspaceTaskStatusUpdateManyWithoutWorkspaceNestedInput
   user: UserUpdateManyWithoutCurrentWorkspaceNestedInput
 }
@@ -1453,27 +1470,115 @@ input TaskUpdateWithoutStatusInput {
   assignedMembers: AssignedMemberUpdateManyWithoutTaskNestedInput
 }
 
-input WorkspaceUpdateOneRequiredWithoutTasksNestedInput {
-  create: WorkspaceCreateWithoutTasksInput
-  connectOrCreate: WorkspaceCreateOrConnectWithoutTasksInput
-  upsert: WorkspaceUpsertWithoutTasksInput
-  connect: WorkspaceWhereUniqueInput
-  update: WorkspaceUpdateWithoutTasksInput
+input AssignedMemberUpdateManyWithoutTaskNestedInput {
+  create: [AssignedMemberCreateWithoutTaskInput!]
+  connectOrCreate: [AssignedMemberCreateOrConnectWithoutTaskInput!]
+  upsert: [AssignedMemberUpsertWithWhereUniqueWithoutTaskInput!]
+  createMany: AssignedMemberCreateManyTaskInputEnvelope
+  set: [AssignedMemberWhereUniqueInput!]
+  disconnect: [AssignedMemberWhereUniqueInput!]
+  delete: [AssignedMemberWhereUniqueInput!]
+  connect: [AssignedMemberWhereUniqueInput!]
+  update: [AssignedMemberUpdateWithWhereUniqueWithoutTaskInput!]
+  updateMany: [AssignedMemberUpdateManyWithWhereWithoutTaskInput!]
+  deleteMany: [AssignedMemberScalarWhereInput!]
 }
 
-input WorkspaceUpsertWithoutTasksInput {
-  update: WorkspaceUpdateWithoutTasksInput!
-  create: WorkspaceCreateWithoutTasksInput!
+input AssignedMemberUpsertWithWhereUniqueWithoutTaskInput {
+  where: AssignedMemberWhereUniqueInput!
+  update: AssignedMemberUpdateWithoutTaskInput!
+  create: AssignedMemberCreateWithoutTaskInput!
 }
 
-input WorkspaceUpdateWithoutTasksInput {
+input AssignedMemberUpdateManyWithWhereWithoutTaskInput {
+  where: AssignedMemberScalarWhereInput!
+  data: AssignedMemberUpdateManyMutationInput!
+}
+
+input AssignedMemberScalarWhereInput {
+  AND: [AssignedMemberScalarWhereInput!]
+  OR: [AssignedMemberScalarWhereInput!]
+  NOT: [AssignedMemberScalarWhereInput!]
+  memberId: StringFilter
+  taskId: StringFilter
+  role: EnumTaskRoleFilter
+}
+
+input AssignedMemberUpdateManyMutationInput {
+  role: EnumTaskRoleFieldUpdateOperationsInput
+}
+
+input EnumTaskRoleFieldUpdateOperationsInput {
+  set: TaskRole
+}
+
+input TaskUpdateWithWhereUniqueWithoutStatusInput {
+  where: TaskWhereUniqueInput!
+  data: TaskUpdateWithoutStatusInput!
+}
+
+input TaskUpdateManyWithWhereWithoutStatusInput {
+  where: TaskScalarWhereInput!
+  data: TaskUpdateManyMutationInput!
+}
+
+input TaskScalarWhereInput {
+  AND: [TaskScalarWhereInput!]
+  OR: [TaskScalarWhereInput!]
+  NOT: [TaskScalarWhereInput!]
+  uuid: StringFilter
+  title: StringFilter
+  description: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+  workspaceId: StringFilter
+  statusId: StringFilter
+}
+
+input TaskUpdateManyMutationInput {
   uuid: StringFieldUpdateOperationsInput
-  name: StringFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  description: StringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
-  members: WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
-  taskStatuses: WorkspaceTaskStatusUpdateManyWithoutWorkspaceNestedInput
-  user: UserUpdateManyWithoutCurrentWorkspaceNestedInput
+}
+
+input IntFieldUpdateOperationsInput {
+  set: Int
+  increment: Int
+  decrement: Int
+  multiply: Int
+  divide: Int
+}
+
+input WorkspaceTaskStatusUpdateWithWhereUniqueWithoutWorkspaceInput {
+  where: WorkspaceTaskStatusWhereUniqueInput!
+  data: WorkspaceTaskStatusUpdateWithoutWorkspaceInput!
+}
+
+input WorkspaceTaskStatusUpdateManyWithWhereWithoutWorkspaceInput {
+  where: WorkspaceTaskStatusScalarWhereInput!
+  data: WorkspaceTaskStatusUpdateManyMutationInput!
+}
+
+input WorkspaceTaskStatusScalarWhereInput {
+  AND: [WorkspaceTaskStatusScalarWhereInput!]
+  OR: [WorkspaceTaskStatusScalarWhereInput!]
+  NOT: [WorkspaceTaskStatusScalarWhereInput!]
+  uuid: StringFilter
+  title: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+  workspaceId: StringFilter
+  order: IntFilter
+}
+
+input WorkspaceTaskStatusUpdateManyMutationInput {
+  uuid: StringFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
 }
 
 input UserUpdateManyWithoutCurrentWorkspaceNestedInput {
@@ -1535,55 +1640,56 @@ input WorkspaceMemberUpdateWithoutUserInput {
   tasks: AssignedMemberUpdateManyWithoutMemberNestedInput
 }
 
-input EnumWorkspaceMemberRoleFieldUpdateOperationsInput {
-  set: WorkspaceMemberRole
+input WorkspaceUpdateOneRequiredWithoutMembersNestedInput {
+  create: WorkspaceCreateWithoutMembersInput
+  connectOrCreate: WorkspaceCreateOrConnectWithoutMembersInput
+  upsert: WorkspaceUpsertWithoutMembersInput
+  connect: WorkspaceWhereUniqueInput
+  update: WorkspaceUpdateWithoutMembersInput
 }
 
-input AssignedMemberUpdateManyWithoutMemberNestedInput {
-  create: [AssignedMemberCreateWithoutMemberInput!]
-  connectOrCreate: [AssignedMemberCreateOrConnectWithoutMemberInput!]
-  upsert: [AssignedMemberUpsertWithWhereUniqueWithoutMemberInput!]
-  createMany: AssignedMemberCreateManyMemberInputEnvelope
-  set: [AssignedMemberWhereUniqueInput!]
-  disconnect: [AssignedMemberWhereUniqueInput!]
-  delete: [AssignedMemberWhereUniqueInput!]
-  connect: [AssignedMemberWhereUniqueInput!]
-  update: [AssignedMemberUpdateWithWhereUniqueWithoutMemberInput!]
-  updateMany: [AssignedMemberUpdateManyWithWhereWithoutMemberInput!]
-  deleteMany: [AssignedMemberScalarWhereInput!]
+input WorkspaceUpsertWithoutMembersInput {
+  update: WorkspaceUpdateWithoutMembersInput!
+  create: WorkspaceCreateWithoutMembersInput!
 }
 
-input AssignedMemberUpsertWithWhereUniqueWithoutMemberInput {
-  where: AssignedMemberWhereUniqueInput!
-  update: AssignedMemberUpdateWithoutMemberInput!
-  create: AssignedMemberCreateWithoutMemberInput!
+input WorkspaceUpdateWithoutMembersInput {
+  uuid: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  tasks: TaskUpdateManyWithoutWorkspaceNestedInput
+  taskStatuses: WorkspaceTaskStatusUpdateManyWithoutWorkspaceNestedInput
+  user: UserUpdateManyWithoutCurrentWorkspaceNestedInput
 }
 
-input AssignedMemberUpdateWithoutMemberInput {
-  task: TaskUpdateOneRequiredWithoutAssignedMembersNestedInput
-  role: EnumTaskRoleFieldUpdateOperationsInput
+input TaskUpdateManyWithoutWorkspaceNestedInput {
+  create: [TaskCreateWithoutWorkspaceInput!]
+  connectOrCreate: [TaskCreateOrConnectWithoutWorkspaceInput!]
+  upsert: [TaskUpsertWithWhereUniqueWithoutWorkspaceInput!]
+  createMany: TaskCreateManyWorkspaceInputEnvelope
+  set: [TaskWhereUniqueInput!]
+  disconnect: [TaskWhereUniqueInput!]
+  delete: [TaskWhereUniqueInput!]
+  connect: [TaskWhereUniqueInput!]
+  update: [TaskUpdateWithWhereUniqueWithoutWorkspaceInput!]
+  updateMany: [TaskUpdateManyWithWhereWithoutWorkspaceInput!]
+  deleteMany: [TaskScalarWhereInput!]
 }
 
-input TaskUpdateOneRequiredWithoutAssignedMembersNestedInput {
-  create: TaskCreateWithoutAssignedMembersInput
-  connectOrCreate: TaskCreateOrConnectWithoutAssignedMembersInput
-  upsert: TaskUpsertWithoutAssignedMembersInput
-  connect: TaskWhereUniqueInput
-  update: TaskUpdateWithoutAssignedMembersInput
+input TaskUpsertWithWhereUniqueWithoutWorkspaceInput {
+  where: TaskWhereUniqueInput!
+  update: TaskUpdateWithoutWorkspaceInput!
+  create: TaskCreateWithoutWorkspaceInput!
 }
 
-input TaskUpsertWithoutAssignedMembersInput {
-  update: TaskUpdateWithoutAssignedMembersInput!
-  create: TaskCreateWithoutAssignedMembersInput!
-}
-
-input TaskUpdateWithoutAssignedMembersInput {
+input TaskUpdateWithoutWorkspaceInput {
   uuid: StringFieldUpdateOperationsInput
   title: StringFieldUpdateOperationsInput
   description: StringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
-  workspace: WorkspaceUpdateOneRequiredWithoutTasksNestedInput
+  assignedMembers: AssignedMemberUpdateManyWithoutTaskNestedInput
   status: WorkspaceTaskStatusUpdateOneRequiredWithoutTasksNestedInput
 }
 
@@ -1632,39 +1738,14 @@ input WorkspaceUpdateWithoutTaskStatusesInput {
   user: UserUpdateManyWithoutCurrentWorkspaceNestedInput
 }
 
-input IntFieldUpdateOperationsInput {
-  set: Int
-  increment: Int
-  decrement: Int
-  multiply: Int
-  divide: Int
+input TaskUpdateWithWhereUniqueWithoutWorkspaceInput {
+  where: TaskWhereUniqueInput!
+  data: TaskUpdateWithoutWorkspaceInput!
 }
 
-input EnumTaskRoleFieldUpdateOperationsInput {
-  set: TaskRole
-}
-
-input AssignedMemberUpdateWithWhereUniqueWithoutMemberInput {
-  where: AssignedMemberWhereUniqueInput!
-  data: AssignedMemberUpdateWithoutMemberInput!
-}
-
-input AssignedMemberUpdateManyWithWhereWithoutMemberInput {
-  where: AssignedMemberScalarWhereInput!
-  data: AssignedMemberUpdateManyMutationInput!
-}
-
-input AssignedMemberScalarWhereInput {
-  AND: [AssignedMemberScalarWhereInput!]
-  OR: [AssignedMemberScalarWhereInput!]
-  NOT: [AssignedMemberScalarWhereInput!]
-  memberId: StringFilter
-  taskId: StringFilter
-  role: EnumTaskRoleFilter
-}
-
-input AssignedMemberUpdateManyMutationInput {
-  role: EnumTaskRoleFieldUpdateOperationsInput
+input TaskUpdateManyWithWhereWithoutWorkspaceInput {
+  where: TaskScalarWhereInput!
+  data: TaskUpdateManyMutationInput!
 }
 
 input WorkspaceMemberUpdateWithWhereUniqueWithoutUserInput {
@@ -1728,85 +1809,14 @@ input UserUpdateManyMutationInput {
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
 
-input TaskUpdateWithWhereUniqueWithoutStatusInput {
-  where: TaskWhereUniqueInput!
-  data: TaskUpdateWithoutStatusInput!
-}
-
-input TaskUpdateManyWithWhereWithoutStatusInput {
-  where: TaskScalarWhereInput!
-  data: TaskUpdateManyMutationInput!
-}
-
-input TaskScalarWhereInput {
-  AND: [TaskScalarWhereInput!]
-  OR: [TaskScalarWhereInput!]
-  NOT: [TaskScalarWhereInput!]
-  uuid: StringFilter
-  title: StringFilter
-  description: StringFilter
-  createdAt: DateTimeFilter
-  updatedAt: DateTimeFilter
-  workspaceId: StringFilter
-  statusId: StringFilter
-}
-
-input TaskUpdateManyMutationInput {
-  uuid: StringFieldUpdateOperationsInput
-  title: StringFieldUpdateOperationsInput
-  description: StringFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-}
-
-input WorkspaceTaskStatusUpdateWithWhereUniqueWithoutWorkspaceInput {
-  where: WorkspaceTaskStatusWhereUniqueInput!
-  data: WorkspaceTaskStatusUpdateWithoutWorkspaceInput!
-}
-
-input WorkspaceTaskStatusUpdateManyWithWhereWithoutWorkspaceInput {
-  where: WorkspaceTaskStatusScalarWhereInput!
-  data: WorkspaceTaskStatusUpdateManyMutationInput!
-}
-
-input WorkspaceTaskStatusScalarWhereInput {
-  AND: [WorkspaceTaskStatusScalarWhereInput!]
-  OR: [WorkspaceTaskStatusScalarWhereInput!]
-  NOT: [WorkspaceTaskStatusScalarWhereInput!]
-  uuid: StringFilter
-  title: StringFilter
-  createdAt: DateTimeFilter
-  updatedAt: DateTimeFilter
-  workspaceId: StringFilter
-  order: IntFilter
-}
-
-input WorkspaceTaskStatusUpdateManyMutationInput {
-  uuid: StringFieldUpdateOperationsInput
-  title: StringFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-  order: IntFieldUpdateOperationsInput
-}
-
-input AssignedMemberUpdateWithWhereUniqueWithoutTaskInput {
+input AssignedMemberUpdateWithWhereUniqueWithoutMemberInput {
   where: AssignedMemberWhereUniqueInput!
-  data: AssignedMemberUpdateWithoutTaskInput!
+  data: AssignedMemberUpdateWithoutMemberInput!
 }
 
-input AssignedMemberUpdateManyWithWhereWithoutTaskInput {
+input AssignedMemberUpdateManyWithWhereWithoutMemberInput {
   where: AssignedMemberScalarWhereInput!
   data: AssignedMemberUpdateManyMutationInput!
-}
-
-input TaskUpdateWithWhereUniqueWithoutWorkspaceInput {
-  where: TaskWhereUniqueInput!
-  data: TaskUpdateWithoutWorkspaceInput!
-}
-
-input TaskUpdateManyWithWhereWithoutWorkspaceInput {
-  where: TaskScalarWhereInput!
-  data: TaskUpdateManyMutationInput!
 }
 
 input WorkspaceMemberUpdateWithWhereUniqueWithoutWorkspaceInput {
@@ -1819,60 +1829,6 @@ input WorkspaceMemberUpdateManyWithWhereWithoutWorkspaceInput {
   data: WorkspaceMemberUpdateManyMutationInput!
 }
 
-input TaskCreateInput {
-  uuid: String
-  title: String!
-  description: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  workspace: WorkspaceCreateNestedOneWithoutTasksInput!
-  assignedMembers: AssignedMemberCreateNestedManyWithoutTaskInput
-  status: WorkspaceTaskStatusCreateNestedOneWithoutTasksInput!
-}
-
-input TaskUpdateInput {
-  uuid: StringFieldUpdateOperationsInput
-  title: StringFieldUpdateOperationsInput
-  description: StringFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-  workspace: WorkspaceUpdateOneRequiredWithoutTasksNestedInput
-  assignedMembers: AssignedMemberUpdateManyWithoutTaskNestedInput
-  status: WorkspaceTaskStatusUpdateOneRequiredWithoutTasksNestedInput
-}
-
-input WorkspaceMemberCreateInput {
-  uuid: String
-  user: UserCreateNestedOneWithoutWorkspaceParticipationInput!
-  workspace: WorkspaceCreateNestedOneWithoutMembersInput!
-  role: WorkspaceMemberRole
-  createdAt: DateTime
-  updatedAt: DateTime
-  tasks: AssignedMemberCreateNestedManyWithoutMemberInput
-}
-
-input WorkspaceMemberUpdateInput {
-  uuid: StringFieldUpdateOperationsInput
-  user: UserUpdateOneRequiredWithoutWorkspaceParticipationNestedInput
-  workspace: WorkspaceUpdateOneRequiredWithoutMembersNestedInput
-  role: EnumWorkspaceMemberRoleFieldUpdateOperationsInput
-  createdAt: DateTimeFieldUpdateOperationsInput
-  updatedAt: DateTimeFieldUpdateOperationsInput
-  tasks: AssignedMemberUpdateManyWithoutMemberNestedInput
-}
-
-input AssignedMemberCreateInput {
-  member: WorkspaceMemberCreateNestedOneWithoutTasksInput!
-  task: TaskCreateNestedOneWithoutAssignedMembersInput!
-  role: TaskRole
-}
-
-input AssignedMemberUpdateInput {
-  member: WorkspaceMemberUpdateOneRequiredWithoutTasksNestedInput
-  task: TaskUpdateOneRequiredWithoutAssignedMembersNestedInput
-  role: EnumTaskRoleFieldUpdateOperationsInput
-}
-
 input RegistrationInput {
   email: String!
   firstName: String!
@@ -1881,11 +1837,5 @@ input RegistrationInput {
 }
 
 input WorkspaceTaskStatusCreateInput {
-  uuid: String
   title: String!
-  createdAt: DateTime
-  updatedAt: DateTime
-  workspace: WorkspaceCreateNestedOneWithoutTaskStatusesInput!
-  tasks: TaskCreateNestedManyWithoutStatusInput
-  order: Int
 }

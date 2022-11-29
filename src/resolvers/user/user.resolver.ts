@@ -5,7 +5,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { User, Workspace } from 'prisma/generated/types';
+import { User, Workspace } from '../../@generated';
 import { CurrentUser } from '../../decorators';
 import { PrismaService } from '../../prisma.service';
 
