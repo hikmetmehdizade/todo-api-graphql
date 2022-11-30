@@ -40,5 +40,5 @@ export interface ChangeCurrentWorkspaceInput {
 }
 
 export interface ChangeCurrentWorkspaceData {
-  changeCurrentWorkspace: MutationPayload;
+  changeCurrentWorkspace: Workspace;
 }

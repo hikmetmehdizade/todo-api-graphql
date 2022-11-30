@@ -5,9 +5,11 @@ import {
   Query,
   ResolveField,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
-import { CurrentUser, WMRoles } from 'src/decorators';
-import { PrismaService } from 'src/prisma.service';
+import { CurrentUser, Public, WMRoles } from '../../decorators';
+import { PrismaService } from '../../prisma.service';
+import { MutationPayload } from '../../types/mutation-payload';
 import {
   AssignedMember,
   FindManyTaskArgs,
@@ -18,12 +20,23 @@ import {
   WorkspaceMemberRole,
   WorkspaceTaskStatus,
 } from '../../@generated';
-import { CreateTaskArgs, DeleteTaskArgs, UpdateTaskArgs } from './task.args';
+import {
+  CreateTaskArgs,
+  DeleteTaskArgs,
+  TaskSubscriptionPayload,
+  UpdateTaskArgs,
+} from './task.args';
 import { TaskService } from './task.service';
+import { Inject } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB, SubscriptionTriggers } from '../../consts';
+import { GenerateSubscriptionPayload } from 'src/utils/subscription';
+import { SubscriptionAction } from 'src/types';
 
 @Resolver(() => Task)
 export class TaskResolver {
   constructor(
+    @Inject(PUB_SUB) private pubSub: PubSub,
     private prisma: PrismaService,
     private taskService: TaskService,
   ) {}
@@ -43,11 +56,11 @@ export class TaskResolver {
     WorkspaceMemberRole.OWNER,
     WorkspaceMemberRole.USER,
   )
-  @Mutation(() => Task, { name: 'createTask' })
+  @Mutation(() => MutationPayload, { name: 'createTask' })
   async createTask(
     @CurrentUser() user: User,
     @Args() createTaskArgs: CreateTaskArgs,
-  ) {
+  ): Promise<MutationPayload> {
     const { data, members, workspaceWhereUniqueInput } = createTaskArgs;
     const taskStatus = await this.taskService.getFirstTaskStatus(
       workspaceWhereUniqueInput.uuid,
@@ -58,7 +71,7 @@ export class TaskResolver {
         member: { connect: { uuid: workspaceMemberWhereUniqueInput.uuid } },
       }),
     );
-    return this.prisma.task.create({
+    const task = await this.prisma.task.create({
       data: {
         ...data,
         assignedMembers: {
@@ -73,21 +86,73 @@ export class TaskResolver {
           },
         },
       },
+      include: {
+        _count: true,
+      },
     });
+
+    this.pubSub.publish(SubscriptionTriggers.TASK_SUB, {
+      taskSub: new GenerateSubscriptionPayload(task, SubscriptionAction.CREATE),
+    });
+
+    return {
+      _count: 1,
+    };
   }
 
-  @Mutation(() => Task, { name: 'updateTask' })
-  updateTask(@Args() updateTaskArgs: UpdateTaskArgs) {
+  @Mutation(() => MutationPayload, { name: 'updateTask' })
+  async updateTask(
+    @Args() updateTaskArgs: UpdateTaskArgs,
+  ): Promise<MutationPayload> {
     const { data, taskWhereUniqueInput } = updateTaskArgs;
-    return this.prisma.task.update({ where: taskWhereUniqueInput, data });
+    const updatedTask = await this.prisma.task.update({
+      where: taskWhereUniqueInput,
+      data,
+    });
+    this.pubSub.publish(SubscriptionTriggers.TASK_SUB, {
+      taskSub: new GenerateSubscriptionPayload(
+        updatedTask,
+        SubscriptionAction.UPDATE,
+      ),
+    });
+    return {
+      _count: 1,
+    };
   }
 
-  @Mutation(() => Task, { name: 'deleteTask' })
-  deleteTask(@Args() deleteTaskArgs: DeleteTaskArgs) {
+  @Mutation(() => MutationPayload, { name: 'deleteTask' })
+  async deleteTask(
+    @Args() deleteTaskArgs: DeleteTaskArgs,
+  ): Promise<MutationPayload> {
     const { taskWhereUniqueInput } = deleteTaskArgs;
-    return this.prisma.task.delete({ where: taskWhereUniqueInput });
+    const deletedTask = await this.prisma.task.delete({
+      where: taskWhereUniqueInput,
+    });
+
+    this.pubSub.publish(SubscriptionTriggers.TASK_SUB, {
+      taskSub: new GenerateSubscriptionPayload(
+        deletedTask,
+        SubscriptionAction.DELETE,
+      ),
+    });
+    return {
+      _count: 1,
+    };
   }
 
+  @Public()
+  @Subscription(() => TaskSubscriptionPayload, {
+    filter(payload, variables, context) {
+      console.log('payload', payload);
+      console.log('var', variables);
+      console.log('context', context);
+
+      return true;
+    },
+  })
+  taskSub() {
+    return this.pubSub.asyncIterator(SubscriptionTriggers.TASK_SUB);
+  }
   @ResolveField(() => Workspace)
   workspace(@Parent() task: Task) {
     return this.prisma.task

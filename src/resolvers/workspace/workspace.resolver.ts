@@ -52,7 +52,15 @@ export class WorkspaceResolver {
       where: {
         AND: [
           workspacesWhereArgs.where,
-          { members: { some: { uuid: user.uuid } } },
+          {
+            members: {
+              some: {
+                user: {
+                  uuid: user.uuid,
+                },
+              },
+            },
+          },
         ],
       },
     });
@@ -77,7 +85,7 @@ export class WorkspaceResolver {
   }
 
   @Mutation(() => Workspace, { name: 'createWorkspace' })
-  createWorkspace(
+  async createWorkspace(
     @CurrentUser() user: User,
     @Args() createWorkspaceArgs: CreateWorkspaceArgs,
   ) {
@@ -92,7 +100,7 @@ export class WorkspaceResolver {
       },
     };
 
-    return this.prisma.workspace.create({
+    const createdWorkspace = await this.prisma.workspace.create({
       data: {
         ...data,
         members: {
@@ -103,7 +111,25 @@ export class WorkspaceResolver {
         },
       },
     });
+
+    if (!user.currentWorkspaceId) {
+      await this.prisma.user.update({
+        data: {
+          currentWorkspace: {
+            connect: {
+              uuid: createdWorkspace.uuid,
+            },
+          },
+        },
+        where: {
+          uuid: user.uuid,
+        },
+      });
+    }
+
+    return createdWorkspace;
   }
+
   @Mutation(() => Workspace, { name: 'updateWorkspace' })
   @WMRoles(WorkspaceMemberRole.OWNER, WorkspaceMemberRole.ADMIN)
   async updateWorkspace(

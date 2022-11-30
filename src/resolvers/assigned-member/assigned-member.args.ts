@@ -1,5 +1,4 @@
 import { ArgsType, Field } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import {
   AssignedMemberWhereUniqueInput,
   TaskRole,

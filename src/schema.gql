@@ -303,14 +303,29 @@ type WorkspaceTaskStatusMaxAggregate {
   order: Int
 }
 
+type MutationPayload {
+  _count: Int!
+}
+
+type TaskSubscriptionPayload {
+  payload: Task!
+  action: SubscriptionAction!
+}
+
+enum SubscriptionAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 type Query {
+  me: User!
   workspaces(where: WorkspaceWhereInput, orderBy: [WorkspaceOrderByWithRelationInput!], take: Int, skip: Int): [Workspace!]!
   workspace(where: WorkspaceWhereUniqueInput!): Workspace!
   task(where: TaskWhereUniqueInput!): Task!
   tasks(where: TaskWhereInput, orderBy: [TaskOrderByWithRelationInput!], cursor: TaskWhereUniqueInput, take: Int, skip: Int, distinct: [TaskScalarFieldEnum!]): [Task!]!
   workspaceMember(where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
   workspaceMembers(where: WorkspaceMemberWhereInput, orderBy: [WorkspaceMemberOrderByWithRelationInput!], cursor: WorkspaceMemberWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceMemberScalarFieldEnum!]): [WorkspaceMember!]!
-  me: User!
   workspaceTaskStatuses(where: WorkspaceTaskStatusWhereInput, orderBy: [WorkspaceTaskStatusOrderByWithRelationInput!], cursor: WorkspaceTaskStatusWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceTaskStatusScalarFieldEnum!]): [WorkspaceTaskStatus!]!
 }
 
@@ -718,23 +733,30 @@ enum WorkspaceTaskStatusScalarFieldEnum {
 }
 
 type Mutation {
+  login(email: String!, password: String!): User!
+  registration(data: RegistrationInputType!): User!
+  logout: Boolean!
   createWorkspace(data: CreateWorkspaceInputData!): Workspace!
   updateWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, data: UpdateWorkspaceInputData!): Workspace!
   removeWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): Workspace!
   changeCurrentWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): Workspace!
-  createTask(data: CreateTaskInputData!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, members: [ConnectWorkspaceMemberInputType!]!): Task!
-  updateTask(data: UpdateTaskInputType!, taskWhereUniqueInput: TaskWhereUniqueInput!): Task!
-  deleteTask(taskWhereUniqueInput: TaskWhereUniqueInput!): Task!
+  createTask(data: CreateTaskInputData!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, members: [ConnectWorkspaceMemberInputType!]!): MutationPayload!
+  updateTask(data: UpdateTaskInputType!, taskWhereUniqueInput: TaskWhereUniqueInput!): MutationPayload!
+  deleteTask(taskWhereUniqueInput: TaskWhereUniqueInput!): MutationPayload!
   createWorkspaceMember(role: WorkspaceMemberRole!, userWhereUniqueInput: UserWhereUniqueInput!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
   updateWorkspaceMember(role: WorkspaceMemberRole!, workspaceMemberWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
   deleteWorkspaceMember(workspaceMemberWhereUniqueInput: WorkspaceWhereUniqueInput!): WorkspaceMember!
   createAssignedMember(role: TaskRole = EXECUTOR, workspaceMemberWhereUniqueInput: WorkspaceMemberWhereUniqueInput!, taskWhereUniqueInput: TaskWhereUniqueInput!): AssignedMember!
   updateAssignedMember(role: TaskRole!, assignedMemberWhereUniqueInput: AssignedMemberWhereUniqueInput!): AssignedMember!
   deleteAssignedMember(assignedMemberWhereUniqueInput: AssignedMemberWhereUniqueInput!): AssignedMember!
-  login(email: String!, password: String!): User!
-  registration(data: RegistrationInput!): User!
-  logout: Boolean!
   createWorkspaceTaskStatus(data: WorkspaceTaskStatusCreateInput!, workspaceWhereUniqueInput: WorkspaceWhereUniqueInput): WorkspaceTaskStatus!
+}
+
+input RegistrationInputType {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
 }
 
 input CreateWorkspaceInputData {
@@ -1829,13 +1851,10 @@ input WorkspaceMemberUpdateManyWithWhereWithoutWorkspaceInput {
   data: WorkspaceMemberUpdateManyMutationInput!
 }
 
-input RegistrationInput {
-  email: String!
-  firstName: String!
-  lastName: String!
-  password: String!
-}
-
 input WorkspaceTaskStatusCreateInput {
   title: String!
+}
+
+type Subscription {
+  taskSub: TaskSubscriptionPayload!
 }

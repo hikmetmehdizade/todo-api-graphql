@@ -3,6 +3,7 @@ import {
   CreateTaskInput,
   DeleteTaskInput,
   UpdateTaskInput,
+  UpdateTaskInputData,
 } from './interfaces';
 import {
   TaskCreateInput,
@@ -13,9 +14,16 @@ import {
   TaskWhereUniqueInput,
   WorkspaceTaskStatusUpdateOneRequiredWithoutTasksNestedInput,
   AssignedMemberUpdateManyWithoutTaskNestedInput,
+  Task,
 } from '../../@generated';
-import { ArgsType, Field, InputType, PickType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
+import {
+  ArgsType,
+  Field,
+  InputType,
+  ObjectType,
+  PickType,
+} from '@nestjs/graphql';
+import { SubscriptionPayload } from 'src/utils/subscription';
 
 @InputType()
 class CreateTaskInputData extends PickType(TaskCreateInput, [
@@ -57,10 +65,10 @@ class AssignedMemberUpdateManyWithoutTaskNestedInputType extends PickType(
 ) {}
 
 @InputType()
-class UpdateTaskInputType extends PickType(TaskUpdateInput, [
-  'title',
-  'description',
-]) {
+class UpdateTaskInputType
+  extends PickType(TaskUpdateInput, ['title', 'description'])
+  implements UpdateTaskInputData
+{
   @Field(() => WorkspaceTaskStatusConnectInputType, {
     nullable: true,
   })
@@ -86,3 +94,6 @@ export class DeleteTaskArgs implements DeleteTaskInput {
   @Field(() => TaskWhereUniqueInput, { nullable: false })
   taskWhereUniqueInput: TaskWhereUniqueInput;
 }
+
+@ObjectType()
+export class TaskSubscriptionPayload extends SubscriptionPayload(Task) {}

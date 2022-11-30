@@ -10,7 +10,7 @@ services:
       - .:/usr/src/api
     container_name: graphql-api-todo
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@graph-db:5432/jesttest
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-db:5432/todo
       - JWT_SECRET_KEY=mem
     command: [ "npm", "run", "start:dev" ]
     ports:
@@ -18,11 +18,11 @@ services:
     networks:
       - graph-network
     depends_on:
-      - db
+      - postgres-db
 
-  db:
+  postgres-db:
     image: postgres:15
-    container_name: graph-db
+    container_name: postgres-db
     restart: always
     environment:
       - POSTGRES_DB=todo

@@ -1,4 +1,5 @@
 import { Prisma, TaskRole } from '@prisma/client';
+import { MutationPayload } from '../../../types';
 
 export interface ConnectWorkspaceMember {
   workspaceMemberWhereUniqueInput: Prisma.WorkspaceMemberWhereUniqueInput;
@@ -11,7 +12,7 @@ export interface CreateTaskInput {
   members: ConnectWorkspaceMember[];
 }
 
-interface UpdateTaskInputData
+export interface UpdateTaskInputData
   extends Pick<Prisma.TaskUpdateInput, 'title' | 'description'> {
   assignedMembers?: Pick<
     Prisma.AssignedMemberUpdateManyWithoutTaskNestedInput,
@@ -30,4 +31,16 @@ export interface UpdateTaskInput {
 
 export interface DeleteTaskInput {
   taskWhereUniqueInput: Partial<Prisma.TaskWhereUniqueInput>;
+}
+
+export interface DeleteTaskData {
+  deleteTask: MutationPayload;
+}
+
+export interface UpdateTaskData {
+  updateTask: MutationPayload;
+}
+
+export interface CreateTaskData {
+  createTaskInput: MutationPayload;
 }

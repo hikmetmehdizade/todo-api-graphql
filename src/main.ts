@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './resolvers/app.module';
+import { AppModule } from './app.module';
 import { PrismaService } from './prisma.service';
 import * as cookieParser from 'cookie-parser';
 

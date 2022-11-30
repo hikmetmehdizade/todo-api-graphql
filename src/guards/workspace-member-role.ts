@@ -21,17 +21,19 @@ export class WorkspaceRolesGuard implements CanActivate {
 
     const ctx = GqlExecutionContext.create(context);
     const user = ctx.getContext().req.user;
-
-    const count = await this.prisma.workspaceMember.count({
-      where: {
-        workspaceId: user.currentWorkspaceId,
-        userId: user.uuid,
-        role: {
-          in: requiredRoles,
+    if (user.currentWorkspaceId !== null) {
+      const count = await this.prisma.workspaceMember.count({
+        where: {
+          workspaceId: user.currentWorkspaceId,
+          userId: user.uuid,
+          role: {
+            in: requiredRoles,
+          },
         },
-      },
-    });
+      });
 
-    return count === 1;
+      return count === 1;
+    }
+    return false;
   }
 }

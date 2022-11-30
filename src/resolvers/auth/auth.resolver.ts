@@ -7,7 +7,7 @@ import { Ctx } from 'src/types';
 import { User } from '../../@generated';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
-import { RegistrationInput } from './auth.types';
+import { LoginArgs, RegistrationArgs } from './auth.args';
 
 @Resolver(() => User)
 export class AuthResolver {
@@ -19,11 +19,8 @@ export class AuthResolver {
 
   @Mutation(() => User, { name: 'login' })
   @Public()
-  async login(
-    @Context() context: Ctx,
-    @Args('email') email: string,
-    @Args('password') password: string,
-  ) {
+  async login(@Context() context: Ctx, @Args() loginArgs: LoginArgs) {
+    const { email, password } = loginArgs;
     const user = await this.authService.validateUser(email, password);
 
     const { accessToken, refreshToken } = await this.authService.generateTokens(
@@ -41,9 +38,9 @@ export class AuthResolver {
   @Public()
   async registration(
     @Context() context: Ctx,
-    @Args('data') data: RegistrationInput,
+    @Args() registrationArgs: RegistrationArgs,
   ) {
-    const { password, email, firstName, lastName } = data;
+    const { password, email, firstName, lastName } = registrationArgs.data;
 
     const isExists = await this.userService.ensureUserIsExists(email);
     if (isExists) {
