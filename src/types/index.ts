@@ -41,3 +41,4 @@ export * from '../resolvers/workspace-member/interfaces';
 export * from '../resolvers/assigned-member/interfaces';
 export * from '../resolvers/task/interfaces';
 export * from '../resolvers/auth/interfaces';
+export * from '../resolvers/user/interfaces';

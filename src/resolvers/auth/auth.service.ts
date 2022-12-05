@@ -80,6 +80,14 @@ export class AuthService {
     }
   }
 
+  createAuthToken(email: string): string {
+    const payload: TokenPayload = { email };
+
+    const authToken = this.jwtService.sign(payload, { expiresIn: '6h' });
+
+    return authToken;
+  }
+
   async verifyCookies(cookies: Partial<CookiesToken>) {
     const aT = this.verifyToken(cookies?.auth_access_token);
     const rT = this.verifyToken(cookies?.auth_refresh_token);

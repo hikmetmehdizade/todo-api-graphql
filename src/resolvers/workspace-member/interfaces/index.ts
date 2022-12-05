@@ -1,5 +1,5 @@
 import { Prisma, WorkspaceMemberRole } from '@prisma/client';
-import { MutationPayload } from '../../../types';
+import { MutationPayload, WorkspaceMember } from '../../../types';
 
 export interface CreateWorkspaceMemberInput {
   role: WorkspaceMemberRole;
@@ -32,3 +32,7 @@ export type WorkspaceMembersWhereInput = Pick<
   Prisma.WorkspaceMemberFindManyArgs,
   'where' | 'orderBy' | 'skip' | 'take'
 >;
+
+export interface WorkspaceMembersData {
+  workspaceMembers: WorkspaceMember[];
+}

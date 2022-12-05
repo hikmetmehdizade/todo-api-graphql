@@ -325,7 +325,7 @@ type Query {
   task(where: TaskWhereUniqueInput!): Task!
   tasks(where: TaskWhereInput, orderBy: [TaskOrderByWithRelationInput!], cursor: TaskWhereUniqueInput, take: Int, skip: Int, distinct: [TaskScalarFieldEnum!]): [Task!]!
   workspaceMember(where: WorkspaceMemberWhereUniqueInput!): WorkspaceMember!
-  workspaceMembers(where: WorkspaceMemberWhereInput, orderBy: [WorkspaceMemberOrderByWithRelationInput!], cursor: WorkspaceMemberWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceMemberScalarFieldEnum!]): [WorkspaceMember!]!
+  workspaceMembers(where: WorkspaceMemberWhereInput, orderBy: [WorkspaceMemberOrderByWithRelationInput!], take: Int, skip: Int): [WorkspaceMember!]!
   workspaceTaskStatuses(where: WorkspaceTaskStatusWhereInput, orderBy: [WorkspaceTaskStatusOrderByWithRelationInput!], cursor: WorkspaceTaskStatusWhereUniqueInput, take: Int, skip: Int, distinct: [WorkspaceTaskStatusScalarFieldEnum!]): [WorkspaceTaskStatus!]!
 }
 
@@ -710,15 +710,6 @@ input UserOrderByWithRelationInput {
   currentWorkspaceId: SortOrder
 }
 
-enum WorkspaceMemberScalarFieldEnum {
-  uuid
-  userId
-  workspaceId
-  role
-  createdAt
-  updatedAt
-}
-
 input WorkspaceTaskStatusWhereUniqueInput {
   uuid: String
 }
@@ -736,6 +727,7 @@ type Mutation {
   login(email: String!, password: String!): User!
   registration(data: RegistrationInputType!): User!
   logout: Boolean!
+  inviteUserToWorkspace(data: InviteUserToWorkspaceInput!): MutationPayload!
   createWorkspace(data: CreateWorkspaceInputData!): Workspace!
   updateWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!, data: UpdateWorkspaceInputData!): Workspace!
   removeWorkspace(workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!): Workspace!
@@ -757,6 +749,14 @@ input RegistrationInputType {
   firstName: String!
   lastName: String!
   password: String!
+}
+
+input InviteUserToWorkspaceInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  workspaceWhereUniqueInput: WorkspaceWhereUniqueInput!
+  role: WorkspaceMemberRole!
 }
 
 input CreateWorkspaceInputData {

@@ -6,10 +6,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { WMRoles } from '../../decorators';
+import { CurrentUser, WMRoles } from '../../decorators';
 import {
-  DeleteOneWorkspaceMemberArgs,
-  FindManyWorkspaceMemberArgs,
   FindUniqueWorkspaceMemberArgs,
   User,
   Workspace,
@@ -19,8 +17,9 @@ import {
 import { PrismaService } from '../../prisma.service';
 import {
   CreateWorkspaceMemberArgs,
-  UpdateWorkspaceMemberArgs,
   DeleteWorkspaceMemberArgs,
+  UpdateWorkspaceMemberArgs,
+  WorkspaceMembersWhereArgs,
 } from './workspace-member.args';
 import { WorkspaceRolesGuard } from '../../guards/workspace-member-role';
 import { UseGuards } from '@nestjs/common';
@@ -40,10 +39,26 @@ export class WorkspaceMemberResolver {
   }
 
   @Query(() => [WorkspaceMember], { name: 'workspaceMembers' })
-  workspaceMembers(
-    @Args() findManyWorkspaceMemberInput: FindManyWorkspaceMemberArgs,
+  @WMRoles(
+    WorkspaceMemberRole.ADMIN,
+    WorkspaceMemberRole.OWNER,
+    WorkspaceMemberRole.USER,
+  )
+  async workspaceMembers(
+    @Args() workspaceMembersWhereArgs: WorkspaceMembersWhereArgs,
+    @CurrentUser() user: User,
   ) {
-    return this.prisma.workspaceMember.findMany(findManyWorkspaceMemberInput);
+    const members = await this.prisma.workspaceMember.findMany({
+      ...workspaceMembersWhereArgs,
+      where: {
+        AND: [
+          workspaceMembersWhereArgs.where,
+          { workspace: { is: { uuid: user.currentWorkspaceId } } },
+        ],
+      },
+    });
+
+    return members;
   }
 
   @Mutation(() => WorkspaceMember, { name: 'createWorkspaceMember' })

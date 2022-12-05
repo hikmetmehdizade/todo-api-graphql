@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { PrismaService } from './prisma.service';
 import * as cookieParser from 'cookie-parser';
 
-async function bootstrap() {
+(async () => {
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: 'http://localhost:3000',
@@ -16,5 +16,4 @@ async function bootstrap() {
   app.use(cookieParser());
 
   await app.listen(4001);
-}
-bootstrap();
+})();
