@@ -6,6 +6,8 @@ import {
   UserIdentity as BaseUserIdentity,
   WorkspaceMember as BaseWorkspaceMember,
   AssignedMember as BaseAssignedMember,
+  TaskRole,
+  WorkspaceMemberRole,
 } from '@prisma/client';
 
 export interface Workspace extends BaseWorkspace {
@@ -43,3 +45,5 @@ export interface AssignedMember extends BaseAssignedMember {
   member: WorkspaceMember;
   task: Task;
 }
+
+export { TaskRole, WorkspaceMemberRole };

@@ -35,7 +35,7 @@ export class UserResolver {
     const isExist = await this.userService.ensureUserIsExists(email);
 
     if (isExist) {
-      const { _count } = await this.prisma.workspace.update({
+      await this.prisma.workspace.update({
         where: {
           uuid: workspaceWhereUniqueInput.uuid,
         },
@@ -51,10 +51,9 @@ export class UserResolver {
             },
           },
         },
-        include: { _count: true },
       });
 
-      return { _count };
+      return { _count: 1 };
     } else {
       const [user] = await this.prisma.$transaction([
         this.prisma.user.create({
@@ -62,9 +61,6 @@ export class UserResolver {
             email,
             firstName,
             lastName,
-          },
-          include: {
-            _count: true,
           },
         }),
         this.prisma.workspaceMember.create({
@@ -76,11 +72,9 @@ export class UserResolver {
         }),
       ]);
 
-      const token = this.authService.createAuthToken(user.email);
+      this.authService.createAuthToken(user.email);
 
-      console.log(token);
-
-      return { _count: user._count };
+      return { _count: 1 };
     }
   }
 
